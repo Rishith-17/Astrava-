@@ -1,0 +1,447 @@
+.advisory-report {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.report-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.report-section {
+  background: var(--surface-primary);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.report-section.highlight {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid var(--primary-color);
+}
+
+.report-section.collapsible {
+  cursor: pointer;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+}
+
+.section-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.section-header h2 {
+  flex: 1;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.toggle-icon {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  transition: transform 0.3s ease;
+}
+
+.section-content {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.location-section .section-content {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.location-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-item .label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.info-item .value {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.fertility-high {
+  color: #16a34a;
+}
+
+.fertility-medium {
+  color: #ca8a04;
+}
+
+.fertility-low {
+  color: #dc2626;
+}
+
+.interpretation,
+.explanation {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin: 12px 0 0 0;
+}
+
+/* Deficiency Tags */
+.deficiency-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.deficiency-tag {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.deficiency-tag.none {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.deficiency-tag.deficient {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* NPK Display */
+.npk-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface-secondary);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.npk-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.npk-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Dosage Grid */
+.dosage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dosage-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: var(--surface-secondary);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.nutrient-name {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.nutrient-dose {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Lists */
+.section-content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 20px 0 12px 0;
+}
+
+.schedule-list,
+.organic-list,
+.recommendations-list,
+.tips-list,
+.mitigation-list {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.schedule-list li,
+.organic-list li,
+.recommendations-list li,
+.tips-list li,
+.mitigation-list li {
+  margin: 8px 0;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Crop Cards */
+.crops-detailed {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.crop-card {
+  padding: 16px;
+  background: var(--surface-secondary);
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.crop-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.crop-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.crop-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* Irrigation Details */
+.current-status {
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.irrigation-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--surface-secondary);
+  border-radius: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-item strong {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Risk Cards */
+.risks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.risk-card {
+  padding: 16px;
+  border-radius: 12px;
+  border-left: 4px solid;
+}
+
+.risk-card.severity-high {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+.risk-card.severity-medium {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.risk-card.severity-low {
+  background: #dcfce7;
+  border-color: #16a34a;
+}
+
+.risk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.risk-type {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.risk-severity {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.risk-description {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Practice Cards */
+.practices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.practice-card {
+  padding: 16px;
+  background: var(--surface-secondary);
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+}
+
+.practice-card h4 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.practice-card p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.practice-card .benefit {
+  color: var(--text-primary);
+}
+
+.practice-card .implementation {
+  color: var(--text-secondary);
+}
+
+/* Vegetation Info */
+.vegetation-info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.health-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.health-badge.health-excellent {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.health-badge.health-good {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.health-badge.health-fair {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.health-badge.health-poor {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .advisory-report {
+    padding: 16px;
+  }
+
+  .report-title {
+    font-size: 1.2rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dosage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crops-detailed {
+    grid-template-columns: 1fr;
+  }
+}

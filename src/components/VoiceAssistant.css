@@ -1,0 +1,142 @@
+.voice-assistant {
+  position: fixed;
+  bottom: 90px;
+  right: 1rem;
+  z-index: 99;
+}
+
+.voice-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.voice-btn:active {
+  transform: scale(0.95);
+}
+
+.voice-btn.active {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+  animation: pulse 1.5s infinite;
+}
+
+.voice-icon {
+  font-size: 1.8rem;
+}
+
+.voice-feedback {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  white-space: nowrap;
+  animation: slideUp 0.3s ease;
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border: 3px solid #10b981;
+  border-radius: 50%;
+  animation: pulseRing 1.5s infinite;
+  pointer-events: none;
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.listening-text {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.transcript-box {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  background: white;
+  padding: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  max-width: 250px;
+  animation: slideUp 0.3s ease;
+}
+
+.transcript-box p {
+  margin: 0;
+  color: #374151;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.error-box {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  background: #fef2f2;
+  padding: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  max-width: 250px;
+  animation: slideUp 0.3s ease;
+  border: 1px solid #fecaca;
+}
+
+.error-box p {
+  margin: 0;
+  color: #dc2626;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Hide on upload and result screens */
+.upload-screen .voice-assistant,
+.result-screen .voice-assistant {
+  display: none;
+}

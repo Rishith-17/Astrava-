@@ -1,0 +1,143 @@
+.upload-screen {
+  padding-top: 1.5rem;
+  min-height: calc(100vh - 80px);
+}
+
+.upload-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0 0.5rem;
+}
+
+.back-btn {
+  background: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+}
+
+.back-btn:active {
+  transform: scale(0.95);
+}
+
+.upload-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.upload-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.option-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.option-card:active {
+  transform: scale(0.98);
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.option-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.option-card h3 {
+  font-size: 1.3rem;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.option-card p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.preview-area {
+  margin-bottom: 1.5rem;
+}
+
+.preview-area img {
+  width: 100%;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.preview-actions {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.75rem;
+}
+
+.btn-retake {
+  padding: 1rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-retake:active {
+  transform: scale(0.98);
+}
+
+.error-message {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.loading {
+  text-align: center;
+  color: white;
+}
+
+.loading p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
