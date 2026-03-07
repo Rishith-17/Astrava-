@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import './AdvisoryReport.css';
+import { t } from '../translations';
 
-function AdvisoryReport({ report, onBack }) {
+function AdvisoryReport({ report, onBack, language = 'en' }) {
   const [expandedSections, setExpandedSections] = useState({
     soil_analysis: true,
     nutrient_status: false,
@@ -29,14 +30,14 @@ function AdvisoryReport({ report, onBack }) {
     <div className="advisory-report">
       <div className="report-header">
         <button className="back-btn" onClick={onBack}>←</button>
-        <h1 className="report-title">🌾 Agricultural Advisory Report</h1>
+        <h1 className="report-title">🌾 {t('agricultural_advisory_report', language)}</h1>
       </div>
 
       {/* Farm Location */}
       <div className="report-section location-section">
         <div className="section-icon">📍</div>
         <div className="section-content">
-          <h2>{sections.farm_location.title}</h2>
+          <h2>{t('farm_location', language)}</h2>
           <p className="location-text">{sections.farm_location.content}</p>
         </div>
       </div>
@@ -45,7 +46,7 @@ function AdvisoryReport({ report, onBack }) {
       <div className="report-section collapsible">
         <div className="section-header" onClick={() => toggleSection('soil_analysis')}>
           <div className="section-icon">🌍</div>
-          <h2>{sections.soil_analysis.title}</h2>
+          <h2>{t('soil_analysis', language)}</h2>
           <span className="toggle-icon">{expandedSections.soil_analysis ? '▼' : '▶'}</span>
         </div>
         {expandedSections.soil_analysis && (
@@ -87,7 +88,7 @@ function AdvisoryReport({ report, onBack }) {
       <div className="report-section collapsible">
         <div className="section-header" onClick={() => toggleSection('nutrient_status')}>
           <div className="section-icon">🧪</div>
-          <h2>{sections.nutrient_status.title}</h2>
+          <h2>{t('nutrient_status', language)}</h2>
           <span className="toggle-icon">{expandedSections.nutrient_status ? '▼' : '▶'}</span>
         </div>
         {expandedSections.nutrient_status && (
@@ -108,7 +109,7 @@ function AdvisoryReport({ report, onBack }) {
       <div className="report-section collapsible highlight">
         <div className="section-header" onClick={() => toggleSection('fertilizer_recommendation')}>
           <div className="section-icon">💊</div>
-          <h2>{sections.fertilizer_recommendation.title}</h2>
+          <h2>{t('fertilizer_recommendation', language)}</h2>
           <span className="toggle-icon">{expandedSections.fertilizer_recommendation ? '▼' : '▶'}</span>
         </div>
         {expandedSections.fertilizer_recommendation && (
@@ -164,7 +165,7 @@ function AdvisoryReport({ report, onBack }) {
       <div className="report-section collapsible">
         <div className="section-header" onClick={() => toggleSection('crop_recommendation')}>
           <div className="section-icon">🌾</div>
-          <h2>{sections.crop_recommendation.title}</h2>
+          <h2>{t('crop_recommendation', language)}</h2>
           <span className="toggle-icon">{expandedSections.crop_recommendation ? '▼' : '▶'}</span>
         </div>
         {expandedSections.crop_recommendation && (
@@ -186,7 +187,7 @@ function AdvisoryReport({ report, onBack }) {
       <div className="report-section collapsible">
         <div className="section-header" onClick={() => toggleSection('irrigation_advice')}>
           <div className="section-icon">💧</div>
-          <h2>{sections.irrigation_advice.title}</h2>
+          <h2>{t('irrigation_advice', language)}</h2>
           <span className="toggle-icon">{expandedSections.irrigation_advice ? '▼' : '▶'}</span>
         </div>
         {expandedSections.irrigation_advice && (
@@ -223,7 +224,7 @@ function AdvisoryReport({ report, onBack }) {
       <div className="report-section collapsible">
         <div className="section-header" onClick={() => toggleSection('risk_assessment')}>
           <div className="section-icon">⚠️</div>
-          <h2>{sections.risk_assessment.title}</h2>
+          <h2>{t('risk_assessment', language)}</h2>
           <span className="toggle-icon">{expandedSections.risk_assessment ? '▼' : '▶'}</span>
         </div>
         {expandedSections.risk_assessment && (
@@ -257,7 +258,7 @@ function AdvisoryReport({ report, onBack }) {
       <div className="report-section collapsible">
         <div className="section-header" onClick={() => toggleSection('climate_smart_practices')}>
           <div className="section-icon">🌱</div>
-          <h2>{sections.climate_smart_practices.title}</h2>
+          <h2>{t('climate_smart_practices', language)}</h2>
           <span className="toggle-icon">{expandedSections.climate_smart_practices ? '▼' : '▶'}</span>
         </div>
         {expandedSections.climate_smart_practices && (
@@ -282,7 +283,7 @@ function AdvisoryReport({ report, onBack }) {
         <div className="report-section">
           <div className="section-icon">🌿</div>
           <div className="section-content">
-            <h2>{sections.vegetation_status.title}</h2>
+            <h2>{t('vegetation_status', language)}</h2>
             <div className="vegetation-info">
               <span>NDVI: {sections.vegetation_status.ndvi}</span>
               <span className={`health-badge health-${sections.vegetation_status.health}`}>

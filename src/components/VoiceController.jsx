@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import sarvamVoiceService from '../services/sarvamVoiceService';
+import autonomousAgentService from '../services/autonomousAgentService';
 import './VoiceController.css';
 
 function VoiceController({ onCommand, onLanguageDetected, currentLanguage, onClose, onPhotoCapture }) {
@@ -8,6 +9,8 @@ function VoiceController({ onCommand, onLanguageDetected, currentLanguage, onClo
   const [error, setError] = useState(null);
   const [audioLevel, setAudioLevel] = useState(0);
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
+  const [agentStatus, setAgentStatus] = useState(null);
+  const [isAgentProcessing, setIsAgentProcessing] = useState(false);
   
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -127,7 +130,48 @@ function VoiceController({ onCommand, onLanguageDetected, currentLanguage, onClo
       }
     }
 
-    // Check for photo/camera commands first
+    // Check for autonomous soil analysis command
+    const analyzeKeywords = ['analyze', 'analyse', 'soil', 'check soil', 'test soil', 'scan soil', 
+      'विश्लेषण', 'मिट्टी', 'ವಿಶ್ಲೇಷಣೆ', 'மண்', 'విశ్లేషణ', 'నేల', 'विश्लेषण', 'माती',
+      'বিশ্লেষণ', 'মাটি', 'વિશ્લેષણ', 'માટી', 'ਵਿਸ਼ਲੇਸ਼ਣ', 'ਮਿੱਟੀ', 'വിശകലനം', 'മണ്ണ്',
+      'ବିଶ୍ଳେଷଣ', 'ମାଟି', 'বিশ্লেষণ', 'মাটি'];
+    
+    const isAnalyzeCommand = analyzeKeywords.some(keyword => lowerText.includes(keyword));
+    
+    if (isAnalyzeCommand) {
+      console.log('🤖 Autonomous soil analysis triggered!');
+      setTranscript('Starting autonomous soil analysis...');
+      setIsAgentProcessing(true);
+      
+      // Setup agent callbacks
+      autonomousAgentService.setCallbacks(
+        (status) => {
+          setAgentStatus(status);
+          setTranscript(status.message);
+        },
+        (result) => {
+          // Pass result to parent with agentic flag
+          if (onCommand) {
+            onCommand('analysis_complete', {
+              ...result.analysis,
+              agenticExplanation: result.explanation,
+              audioBlobs: result.audioBlobs,
+              isAgenticWorkflow: result.isAgenticWorkflow
+            });
+          }
+          setIsAgentProcessing(false);
+          setTimeout(() => {
+            onClose();
+          }, 1000);
+        }
+      );
+      
+      // Execute autonomous workflow
+      autonomousAgentService.executeAnalysisWorkflow(currentLanguage);
+      return;
+    }
+
+    // Check for photo/camera commands
     const photoKeywords = ['photo', 'picture', 'camera', 'take', 'capture', 'upload', 'फोटो', 'ಫೋಟೋ', 'புகைப்படம்', 'ఫోటో', 'फोटो', 'ছবি', 'ફોટો', 'ਫੋਟੋ', 'ഫോട്ടോ', 'ଫଟୋ', 'ফটো'];
     if (photoKeywords.some(keyword => lowerText.includes(keyword))) {
       console.log('Photo command detected');
@@ -140,7 +184,6 @@ function VoiceController({ onCommand, onLanguageDetected, currentLanguage, onClo
 
     // Check for action commands
     const commands = {
-      analyze: ['analyze', 'विश्लेषण', 'ವಿಶ್ಲೇಷಣೆ', 'பகுப்பாய்வு', 'విశ్లేషణ', 'विश्लेषण', 'বিশ্লেষণ', 'વિશ્લેષણ', 'ਵਿਸ਼ਲੇਸ਼ਣ', 'വിശകലനം', 'ବିଶ୍ଳେଷଣ', 'বিশ্লেষণ', 'scan', 'check', 'soil'],
       history: ['history', 'previous', 'past', 'show', 'इतिहास', 'ಇತಿಹಾಸ', 'வரலாறு', 'చరిత్ర', 'इतिहास', 'ইতিহাস', 'ઇતિહાસ', 'ਇਤਿਹਾਸ', 'ചരിത്രം', 'ଇତିହାସ', 'ইতিহাস', 'record', 'results'],
       settings: ['settings', 'setting', 'सेटिंग', 'ಸೆಟ್ಟಿಂಗ್', 'அமைப்புகள்', 'సెట్టింగ్స్', 'सेटिंग', 'সেটিংস', 'સેટિંગ્સ', 'ਸੈਟਿੰਗਾਂ', 'ക്രമീകരണങ്ങൾ', 'ସେଟିଂସ', 'ছেটিংছ', 'change language', 'preferences']
     };
@@ -322,11 +365,26 @@ function VoiceController({ onCommand, onLanguageDetected, currentLanguage, onClo
             <div className="voice-hints">
               <p className="hints-title">Try saying:</p>
               <div className="hints-list">
+                <span className="hint-chip">"Analyze the soil"</span>
                 <span className="hint-chip">"Take photo"</span>
                 <span className="hint-chip">"Show history"</span>
-                <span className="hint-chip">"Open settings"</span>
               </div>
             </div>
+
+            {isAgentProcessing && agentStatus && (
+              <div className="agent-status">
+                <div className="agent-step">
+                  <span className="step-number">Step {agentStatus.step}</span>
+                  <span className="step-message">{agentStatus.message}</span>
+                </div>
+                <div className="agent-progress">
+                  <div 
+                    className="progress-bar"
+                    style={{ width: `${(agentStatus.step / 6) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <>

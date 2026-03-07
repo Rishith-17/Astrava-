@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { analyzeSoil } from '../services/soilService';
+import CameraCapture from './CameraCapture';
 import './UploadScreen.css';
 
 function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhotoProcessed }) {
@@ -7,8 +8,8 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showCamera, setShowCamera] = useState(false);
   
-  const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
   useEffect(() => {
@@ -33,6 +34,13 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
       setPreview(URL.createObjectURL(file));
       setError(null);
     }
+  };
+
+  const handleCameraCapture = (file) => {
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+    setError(null);
+    setShowCamera(false);
   };
 
   const handleAnalyze = async () => {
@@ -75,16 +83,6 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
         <h1 className="upload-title">Capture Soil Photo</h1>
       </div>
       
-      {/* Camera input - triggers native camera */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileSelect}
-        style={{ display: 'none' }}
-      />
-
       {/* Gallery input - opens file picker */}
       <input
         ref={galleryInputRef}
@@ -97,7 +95,7 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
       {!preview && (
         <>
           <div className="upload-options">
-            <button className="option-card" onClick={() => cameraInputRef.current.click()}>
+            <button className="option-card" onClick={() => setShowCamera(true)}>
               <div className="option-icon">📷</div>
               <h3>Take Photo</h3>
               <p>Open camera to capture soil</p>
@@ -157,6 +155,14 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
             <p>Analyzing your soil...</p>
           </div>
         </div>
+      )}
+
+      {/* Camera Capture Modal */}
+      {showCamera && (
+        <CameraCapture
+          onCapture={handleCameraCapture}
+          onClose={() => setShowCamera(false)}
+        />
       )}
     </div>
   );

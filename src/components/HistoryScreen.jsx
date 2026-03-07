@@ -1,6 +1,23 @@
+import { useState } from 'react';
 import './HistoryScreen.css';
 
-function HistoryScreen({ history, loading, onViewResult, onRefresh }) {
+function HistoryScreen({ history, loading, onViewResult, onRefresh, onDeleteItem, onClearAll }) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleClearAll = () => {
+    if (window.confirm('Are you sure you want to delete all analysis history? This cannot be undone.')) {
+      onClearAll();
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleDeleteItem = (e, item) => {
+    e.stopPropagation(); // Prevent card click
+    if (window.confirm(`Delete analysis for ${item.soil_type}?`)) {
+      onDeleteItem(item.id);
+    }
+  };
+
   if (loading) {
     return (
       <div className="screen history-screen">
@@ -30,9 +47,14 @@ function HistoryScreen({ history, loading, onViewResult, onRefresh }) {
     <div className="screen history-screen">
       <div className="history-header">
         <h1 className="screen-title">Analysis History</h1>
-        <button className="refresh-btn" onClick={onRefresh}>
-          🔄
-        </button>
+        <div className="history-actions">
+          <button className="refresh-btn" onClick={onRefresh} title="Refresh">
+            🔄
+          </button>
+          <button className="clear-all-btn" onClick={handleClearAll} title="Clear All">
+            🗑️ Clear All
+          </button>
+        </div>
       </div>
       
       <div className="history-stats">
@@ -61,7 +83,13 @@ function HistoryScreen({ history, loading, onViewResult, onRefresh }) {
                 ))}
               </div>
             </div>
-            <div className="history-arrow">›</div>
+            <button 
+              className="delete-item-btn"
+              onClick={(e) => handleDeleteItem(e, item)}
+              title="Delete"
+            >
+              ✕
+            </button>
           </div>
         ))}
       </div>

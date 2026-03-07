@@ -97,26 +97,22 @@ class SarvamVoiceService {
 
       console.log('Converting speech to text. Language:', language, 'Blob size:', audioBlob.size, 'Type:', audioBlob.type);
       
-      const formData = new FormData();
-      
       // Clean up MIME type - remove codec specification
       let mimeType = audioBlob.type;
       if (mimeType.includes(';')) {
         mimeType = mimeType.split(';')[0];
       }
       
-      // Ensure it's a supported type
-      if (!mimeType || mimeType === '') {
-        mimeType = 'audio/webm';
-      }
+      console.log('Cleaned MIME type:', mimeType);
       
-      console.log('Using MIME type:', mimeType);
-      
-      // Create a new blob with clean MIME type
+      // Create a new blob with clean MIME type (without codecs)
       const cleanBlob = new Blob([audioBlob], { type: mimeType });
       
-      // Create a file from blob
-      const audioFile = new File([cleanBlob], 'audio.webm', { 
+      const formData = new FormData();
+      
+      // Create a file from blob with appropriate extension
+      const extension = mimeType.includes('wav') ? 'wav' : 'webm';
+      const audioFile = new File([cleanBlob], `audio.${extension}`, { 
         type: mimeType
       });
       
@@ -124,7 +120,11 @@ class SarvamVoiceService {
       formData.append('language_code', language);
       formData.append('model', 'saaras:v3');
 
-      console.log('Sending request to Sarvam AI...');
+      console.log('Sending request to Sarvam AI...', {
+        fileName: audioFile.name,
+        fileSize: audioFile.size,
+        fileType: audioFile.type
+      });
 
       const response = await fetch(`${SARVAM_API_BASE}/speech-to-text`, {
         method: 'POST',
@@ -161,18 +161,18 @@ class SarvamVoiceService {
   }
 
   // Convert text to speech using Sarvam AI
-  async textToSpeech(text, language = 'hi-IN', speaker = 'meera') {
+  async textToSpeech(text, language = 'hi-IN', speaker = 'ratan') {
     try {
       if (!SARVAM_API_KEY) {
         throw new Error('Sarvam API key not configured');
       }
 
-      console.log('Converting text to speech:', text, 'Language:', language);
+      console.log('Converting text to speech. Text length:', text.length, 'Language:', language, 'Speaker:', speaker);
 
       const response = await fetch(`${SARVAM_API_BASE}/text-to-speech`, {
         method: 'POST',
         headers: {
-          'API-Subscription-Key': SARVAM_API_KEY,
+          'api-subscription-key': SARVAM_API_KEY,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -184,30 +184,41 @@ class SarvamVoiceService {
           loudness: 1.5,
           speech_sample_rate: 8000,
           enable_preprocessing: true,
-          model: 'bulbul:v1'
+          model: 'bulbul:v3'
         })
       });
 
+      console.log('TTS API response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Sarvam TTS API error:', response.status, errorData);
-        throw new Error(`Sarvam TTS API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Sarvam TTS API error response:', errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { message: errorText };
+        }
+        
+        throw new Error(`Sarvam TTS API error (${response.status}): ${errorData.error?.message || errorData.message || errorText}`);
       }
 
       const data = await response.json();
-      console.log('TTS response received');
+      console.log('TTS response received, audios count:', data.audios?.length);
       
       // Sarvam returns base64 encoded audio
       if (data.audios && data.audios.length > 0) {
         const audioBase64 = data.audios[0];
         const audioBlob = this.base64ToBlob(audioBase64, 'audio/wav');
+        console.log('Audio blob created, size:', audioBlob.size);
         return audioBlob;
       }
       
       throw new Error('No audio data received');
     } catch (error) {
       console.error('Text to speech error:', error);
-      throw new Error('Failed to convert text to speech');
+      throw error;
     }
   }
 
@@ -261,20 +272,20 @@ class SarvamVoiceService {
   // Get speaker for language
   getSpeaker(lang) {
     const speakerMap = {
-      'en': 'meera',
-      'hi': 'meera',
-      'kn': 'meera',
-      'ta': 'meera',
-      'te': 'meera',
-      'mr': 'meera',
-      'bn': 'meera',
-      'gu': 'meera',
-      'pa': 'meera',
-      'ml': 'meera',
-      'or': 'meera',
-      'as': 'meera'
+      'en': 'ratan',      // Male voice with sharp articulation
+      'hi': 'ratan',
+      'kn': 'ratan',
+      'ta': 'ratan',
+      'te': 'ratan',
+      'mr': 'ratan',
+      'bn': 'ratan',
+      'gu': 'ratan',
+      'pa': 'ratan',
+      'ml': 'ratan',
+      'or': 'ratan',
+      'as': 'ratan'
     };
-    return speakerMap[lang] || 'meera';
+    return speakerMap[lang] || 'ratan';
   }
 }
 

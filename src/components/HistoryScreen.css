@@ -10,6 +10,12 @@
   padding: 0 0.5rem;
 }
 
+.history-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .screen-title {
   font-size: 1.75rem;
   font-weight: 700;
@@ -17,18 +23,37 @@
   margin: 0;
 }
 
-.refresh-btn {
+.refresh-btn,
+.clear-all-btn {
   background: white;
   border: 2px solid #e5e7eb;
-  width: 40px;
   height: 40px;
   border-radius: 12px;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   transition: all 0.3s ease;
+  padding: 0 1rem;
+}
+
+.refresh-btn {
+  width: 40px;
+  padding: 0;
+  font-size: 1.2rem;
+}
+
+.clear-all-btn {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.clear-all-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
 }
 
 .refresh-btn:active {
@@ -124,11 +149,41 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  position: relative;
 }
 
 .history-card:active {
   transform: scale(0.98);
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.delete-item-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.delete-item-btn:hover {
+  opacity: 1;
+  background: #fee2e2;
+  transform: scale(1.1);
+}
+
+.delete-item-btn:active {
+  transform: scale(0.95);
 }
 
 .history-icon {

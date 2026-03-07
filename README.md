@@ -14,6 +14,7 @@ A comprehensive soil analysis and agricultural advisory platform for Indian farm
 - **Comprehensive Advisory Reports**: Detailed farming guidance in 13 Indian languages
 - **Multi-Language Support**: Hindi, Kannada, Tamil, Telugu, Marathi, and more
 - **Voice Assistant**: Sarvam AI-powered voice interaction
+- **Wake Word Detection**: Hands-free activation with "Porcupine" or "Computer"
 - **Offline Support**: PWA with service worker for offline access
 
 ### Data Sources
@@ -159,6 +160,12 @@ Astrava/
    - Sign up: https://www.sarvam.ai/
    - Get API key
    - Add to `.env`: `VITE_SARVAM_API_KEY=your_key`
+
+7. **Porcupine Wake Word** (Optional - for hands-free voice)
+   - Sign up: https://console.picovoice.ai/
+   - Get access key (free tier available)
+   - Add to `.env`: `VITE_PORCUPINE_ACCESS_KEY=your_key`
+   - See [PORCUPINE_WAKE_WORD_SETUP.md](./PORCUPINE_WAKE_WORD_SETUP.md) for details
 
 ### Optional APIs (No keys needed)
 - **SoilGrids**: Public API

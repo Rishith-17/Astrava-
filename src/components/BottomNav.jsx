@@ -3,6 +3,7 @@ import './BottomNav.css';
 function BottomNav({ activeScreen, onNavigate }) {
   const navItems = [
     { id: 'home', icon: '🏠', label: 'Home' },
+    { id: 'market', icon: '📈', label: 'Market' },
     { id: 'history', icon: '📊', label: 'History' },
     { id: 'settings', icon: '⚙️', label: 'Settings' }
   ];

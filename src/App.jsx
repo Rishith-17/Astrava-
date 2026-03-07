@@ -4,8 +4,10 @@ import UploadScreen from './components/UploadScreen';
 import ResultScreen from './components/ResultScreen';
 import HistoryScreen from './components/HistoryScreen';
 import SettingsScreen from './components/SettingsScreen';
+import MarketWeatherScreen from './components/MarketWeatherScreen';
 import BottomNav from './components/BottomNav';
 import VoiceAssistant from './components/VoiceAssistant';
+import CameraCapture from './components/CameraCapture';
 import databaseService from './services/database';
 import './App.css';
 
@@ -16,6 +18,8 @@ function App() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [voiceCapturedPhoto, setVoiceCapturedPhoto] = useState(null);
+  const [showCameraCapture, setShowCameraCapture] = useState(false);
+  const [cameraCallbacks, setCameraCallbacks] = useState(null);
 
   useEffect(() => {
     // Load data from database
@@ -26,6 +30,28 @@ function App() {
     if (savedLang) {
       setLanguage(savedLang);
     }
+
+    // Listen for camera capture events from autonomous agent
+    const handleCameraCapture = (event) => {
+      console.log('Camera capture event received');
+      setCameraCallbacks(event.detail);
+      setShowCameraCapture(true);
+    };
+
+    // Listen for camera close event from autonomous agent
+    const handleCloseCameraModal = () => {
+      console.log('Closing camera modal from agent');
+      setShowCameraCapture(false);
+      setCameraCallbacks(null);
+    };
+
+    window.addEventListener('openCameraCapture', handleCameraCapture);
+    window.addEventListener('closeCameraCapture', handleCloseCameraModal);
+
+    return () => {
+      window.removeEventListener('openCameraCapture', handleCameraCapture);
+      window.removeEventListener('closeCameraCapture', handleCloseCameraModal);
+    };
   }, []);
 
   const loadHistory = async () => {
@@ -81,6 +107,12 @@ function App() {
         console.log('Navigating to upload screen');
         setScreen('upload');
         break;
+      case 'analysis_complete':
+        console.log('Autonomous analysis complete, showing results');
+        setResult(data);
+        saveToHistory(data);
+        setScreen('result');
+        break;
       case 'history':
         console.log('Navigating to history screen');
         setScreen('history');
@@ -107,6 +139,68 @@ function App() {
     // Store the file in state and navigate to upload screen
     setVoiceCapturedPhoto(file);
     setScreen('upload');
+  };
+
+  const handleDeleteItem = async (id) => {
+    try {
+      await databaseService.deleteAnalysis(id);
+      await loadHistory();
+      console.log('Analysis deleted:', id);
+    } catch (error) {
+      console.error('Error deleting analysis:', error);
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      await databaseService.clearAllAnalyses();
+      await loadHistory();
+      console.log('All analyses cleared');
+    } catch (error) {
+      console.error('Error clearing analyses:', error);
+    }
+  };
+
+  const handleCameraCapture = (file) => {
+    console.log('[App] handleCameraCapture called');
+    console.log('[App] Photo captured:', file.name, 'Size:', file.size);
+    console.log('[App] cameraCallbacks:', cameraCallbacks);
+    
+    // Call the callback from autonomous agent
+    if (cameraCallbacks && cameraCallbacks.onCapture) {
+      console.log('[App] Calling autonomous agent callback');
+      cameraCallbacks.onCapture(file);
+      console.log('[App] Callback called successfully');
+      
+      // For autonomous mode, keep modal open briefly to show processing
+      // The CameraCapture component will close itself
+      if (!cameraCallbacks.autoCapture) {
+        console.log('[App] Manual mode - closing modal');
+        // Manual mode - close immediately
+        setShowCameraCapture(false);
+        setCameraCallbacks(null);
+      } else {
+        console.log('[App] Autonomous mode - keeping modal open');
+      }
+    } else {
+      console.log('[App] No callback - closing immediately');
+      // No callback - close immediately
+      setShowCameraCapture(false);
+      setCameraCallbacks(null);
+    }
+  };
+
+  const handleCameraClose = () => {
+    console.log('Camera closed by user');
+    
+    // Call the cancel callback
+    if (cameraCallbacks && cameraCallbacks.onCancel) {
+      cameraCallbacks.onCancel();
+    }
+    
+    // Close camera modal
+    setShowCameraCapture(false);
+    setCameraCallbacks(null);
   };
 
   return (
@@ -149,7 +243,13 @@ function App() {
               setScreen('result');
             }}
             onRefresh={loadHistory}
+            onDeleteItem={handleDeleteItem}
+            onClearAll={handleClearAll}
           />
+        )}
+
+        {screen === 'market' && (
+          <MarketWeatherScreen language={language} />
         )}
 
         {screen === 'settings' && (
@@ -170,6 +270,15 @@ function App() {
           />
           <BottomNav activeScreen={screen} onNavigate={setScreen} />
         </>
+      )}
+
+      {/* Camera Capture Modal */}
+      {showCameraCapture && (
+        <CameraCapture
+          onCapture={handleCameraCapture}
+          onClose={handleCameraClose}
+          autoCapture={cameraCallbacks?.autoCapture || false}
+        />
       )}
     </div>
   );

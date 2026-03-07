@@ -15,6 +15,9 @@ import {
   faoStatService
 } from './services/index.js';
 import { AgriculturalAdvisorService } from './services/AgriculturalAdvisorService.js';
+import translationService from './services/TranslationService.js';
+import sarvamTTSService from './services/SarvamTTSService.js';
+import marketPriceService from './services/MarketPriceService.js';
 
 // Load environment variables from parent directory
 dotenv.config({ path: '.env' });
@@ -121,7 +124,7 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
     }
 
     // Step 6: Combine all data into comprehensive analysis
-    const analysis = {
+    let analysis = {
       // ML Model predictions
       soil_type: mlResult.soil_type,
       confidence: mlResult.confidence,
@@ -203,12 +206,20 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
     const advisoryReport = advisorService.generateReport(analysis, language);
     analysis.advisory_report = advisoryReport;
 
+    // Step 9: Translate results to user's language
+    if (language && language !== 'en') {
+      console.log(`Translating results to ${language}...`);
+      analysis = await translationService.translateAnalysisResults(analysis, language);
+      console.log('Translation complete');
+    }
+
     console.log('Analysis complete:', {
       soil_type: analysis.soil_type,
       confidence: analysis.confidence,
       ph: analysis.ph,
       data_sources: analysis.data_sources,
-      report_generated: true
+      report_generated: true,
+      language: language || 'en'
     });
 
     res.json(analysis);
@@ -403,6 +414,155 @@ function recommendCrops(soilType, soilData, weatherData) {
   // Remove duplicates and return top 5
   return [...new Set(crops)].slice(0, 5);
 }
+
+// Translation endpoint (using Sarvam AI)
+app.post('/api/translate', async (req, res) => {
+  try {
+    const { text, targetLanguage } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ error: 'No text provided' });
+    }
+
+    if (!targetLanguage || targetLanguage === 'en') {
+      // No translation needed for English
+      return res.json({ translatedText: text });
+    }
+
+    console.log(`Translating text to ${targetLanguage}. Text length: ${text.length}`);
+
+    // Use Sarvam AI translation service
+    const translatedText = await translationService.translateText(text, targetLanguage);
+    console.log(`Translation complete. Output length: ${translatedText.length}`);
+
+    res.json({ translatedText });
+
+  } catch (error) {
+    console.error('Translation endpoint error:', error.message);
+    res.status(500).json({ 
+      error: 'Translation failed',
+      details: error.message
+    });
+  }
+});
+
+// Text-to-Speech endpoint
+app.post('/api/tts', async (req, res) => {
+  try {
+    const { text, language = 'en' } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ error: 'No text provided' });
+    }
+
+    // Validate text length (max 500 characters per request)
+    if (text.length > 500) {
+      return res.status(400).json({ error: 'Text exceeds 500 character limit. Please split into chunks.' });
+    }
+
+    console.log(`Converting text to speech: ${text.substring(0, 50)}... (${text.length} chars, language: ${language})`);
+
+    const languageCode = sarvamTTSService.getLanguageCode(language);
+    const speaker = sarvamTTSService.getSpeaker(language);
+
+    const audioBuffer = await sarvamTTSService.textToSpeech(text, languageCode, speaker);
+
+    // Set response headers for audio
+    res.set({
+      'Content-Type': 'audio/wav',
+      'Content-Length': audioBuffer.length,
+      'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
+    });
+
+    res.send(audioBuffer);
+
+  } catch (error) {
+    console.error('TTS endpoint error:', error.message);
+    res.status(500).json({ 
+      error: 'Text-to-speech conversion failed',
+      message: error.message 
+    });
+  }
+});
+
+// Market Price endpoints
+app.get('/api/market/search', (req, res) => {
+  try {
+    const { query } = req.query;
+    const crops = marketPriceService.searchCrops(query);
+    res.json({ crops });
+  } catch (error) {
+    console.error('Crop search error:', error);
+    res.status(500).json({ error: 'Failed to search crops' });
+  }
+});
+
+app.get('/api/market/price/:cropName', async (req, res) => {
+  try {
+    const { cropName } = req.params;
+    const { state } = req.query;
+    
+    const result = await marketPriceService.getCropPrice(cropName, state);
+    
+    if (result.success) {
+      res.json(result.data);
+    } else {
+      res.status(500).json({ error: result.error });
+    }
+  } catch (error) {
+    console.error('Market price error:', error);
+    res.status(500).json({ error: 'Failed to fetch market price' });
+  }
+});
+
+// Weather Analytics endpoint (enhanced)
+app.get('/api/weather/analytics', async (req, res) => {
+  try {
+    const { latitude, longitude } = req.query;
+    
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Latitude and longitude required' });
+    }
+
+    const lat = parseFloat(latitude);
+    const lon = parseFloat(longitude);
+
+    // Get current weather
+    const weatherResult = await weatherService.getWeatherData(lat, lon);
+    
+    if (!weatherResult.success) {
+      return res.status(500).json({ error: 'Failed to fetch weather data' });
+    }
+
+    // Generate 7-day forecast (mock data for now)
+    const forecast = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      forecast.push({
+        date: date.toISOString().split('T')[0],
+        temperature: weatherResult.data.temperature + (Math.random() * 6 - 3),
+        humidity: weatherResult.data.humidity + (Math.random() * 10 - 5),
+        rainfall: Math.random() * 20,
+        windSpeed: 5 + Math.random() * 10,
+        pressure: 1013 + (Math.random() * 10 - 5)
+      });
+    }
+
+    res.json({
+      current: weatherResult.data,
+      forecast: forecast,
+      location: {
+        latitude: lat,
+        longitude: lon
+      }
+    });
+
+  } catch (error) {
+    console.error('Weather analytics error:', error);
+    res.status(500).json({ error: 'Failed to fetch weather analytics' });
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
