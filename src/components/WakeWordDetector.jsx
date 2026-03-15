@@ -8,6 +8,7 @@ function WakeWordDetector({ onWakeWordDetected, accessKey }) {
   const [error, setError] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [wakeWordLabel, setWakeWordLabel] = useState('Porcupine');
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
     // Initialize Porcupine when component mounts
@@ -22,17 +23,17 @@ function WakeWordDetector({ onWakeWordDetected, accessKey }) {
         console.log('WakeWordDetector: Initializing with access key...');
         console.log('WakeWordDetector: Access key length:', accessKey?.length);
         console.log('WakeWordDetector: Access key starts with:', accessKey?.substring(0, 10));
-        
+
         // Simple initialization with just built-in "porcupine" keyword
         await porcupineService.initialize(accessKey, handleWakeWordDetected);
-        
+
         setIsInitialized(true);
         setWakeWordLabel(porcupineService.getWakeWordLabel());
         setError(null);
         console.log('WakeWordDetector: Initialization successful');
       } catch (err) {
         console.error('WakeWordDetector: Failed to initialize:', err);
-        
+
         // Provide more specific error message
         let errorMessage = 'Failed to initialize wake word detection';
         if (err.message.includes('Invalid access key')) {
@@ -42,7 +43,7 @@ function WakeWordDetector({ onWakeWordDetected, accessKey }) {
         } else if (err.message) {
           errorMessage = `Error: ${err.message}`;
         }
-        
+
         setError(errorMessage);
         setIsInitialized(false);
       }
@@ -58,10 +59,10 @@ function WakeWordDetector({ onWakeWordDetected, accessKey }) {
 
   const handleWakeWordDetected = (keywordIndex, detectedWord) => {
     console.log('Wake word detected:', detectedWord, 'at index:', keywordIndex);
-    
+
     // Visual feedback
     setIsListening(true);
-    
+
     // Trigger callback
     if (onWakeWordDetected) {
       onWakeWordDetected(keywordIndex, detectedWord);
@@ -83,10 +84,15 @@ function WakeWordDetector({ onWakeWordDetected, accessKey }) {
       if (isEnabled) {
         await porcupineService.stopListening();
         setIsEnabled(false);
+        setIsFadingOut(false);
       } else {
         await porcupineService.startListening();
         setIsEnabled(true);
         setError(null);
+        // Start fade out after a brief moment so the user sees it turned ON
+        setTimeout(() => {
+          setIsFadingOut(true);
+        }, 1500);
       }
     } catch (err) {
       console.error('Failed to toggle wake word:', err);
@@ -99,7 +105,7 @@ function WakeWordDetector({ onWakeWordDetected, accessKey }) {
   }
 
   return (
-    <div className="wake-word-detector">
+    <div className={`wake-word-detector ${isFadingOut ? 'fade-out' : ''}`}>
       <div className="wake-word-header">
         <div className="wake-word-info">
           <span className="wake-word-icon">🎤</span>
@@ -108,7 +114,7 @@ function WakeWordDetector({ onWakeWordDetected, accessKey }) {
             <p>Say "{wakeWordLabel}" to activate</p>
           </div>
         </div>
-        
+
         <button
           className={`wake-word-toggle ${isEnabled ? 'active' : ''}`}
           onClick={toggleWakeWord}

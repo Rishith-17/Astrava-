@@ -1,63 +1,70 @@
 .market-weather-screen {
-  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .market-weather-header {
   padding: 0 1rem;
-  margin-bottom: 1rem;
 }
 
-.market-weather-header h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.tab-selector {
+.tab-pill-container {
   display: flex;
   gap: 0.5rem;
-  padding: 0 1rem;
-  margin-bottom: 1.5rem;
-  background: #f3f4f6;
+  padding: 0.35rem;
   margin: 0 1rem 1.5rem 1rem;
-  padding: 0.25rem;
-  border-radius: 12px;
+  border-radius: 99px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.tab-btn {
+.tab-pill-btn {
   flex: 1;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border: none;
   background: transparent;
-  border-radius: 10px;
+  border-radius: 99px;
   font-weight: 600;
   font-size: 0.95rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
-.tab-btn.active {
-  background: white;
-  color: #10b981;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.tab-pill-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.tab-pill-btn.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--text-primary);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1) inset;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Subtle inner glow for active pill state */
+.tab-pill-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, transparent 100%);
+  border-radius: 99px;
+  pointer-events: none;
 }
 
 .tab-content {
-  animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  flex: 1;
+  animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0 1rem 6rem 1rem;
+  /* Pad bottom for nav */
 }

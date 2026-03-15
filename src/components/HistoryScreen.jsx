@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { History, ActivitySquare, RefreshCw, Trash2, ChevronRight } from 'lucide-react';
 import './HistoryScreen.css';
 
 function HistoryScreen({ history, loading, onViewResult, onRefresh, onDeleteItem, onClearAll }) {
@@ -20,11 +21,11 @@ function HistoryScreen({ history, loading, onViewResult, onRefresh, onDeleteItem
 
   if (loading) {
     return (
-      <div className="screen history-screen">
-        <h1 className="screen-title">Analysis History</h1>
-        <div className="loading-state">
+      <div className="screen history-screen animate-fade-in">
+        <h1 className="screen-title text-gradient">Analysis History</h1>
+        <div className="loading-state glass-panel">
           <div className="spinner"></div>
-          <p>Loading history...</p>
+          <p className="text-secondary">Loading history...</p>
         </div>
       </div>
     );
@@ -32,64 +33,74 @@ function HistoryScreen({ history, loading, onViewResult, onRefresh, onDeleteItem
 
   if (history.length === 0) {
     return (
-      <div className="screen history-screen">
-        <h1 className="screen-title">Analysis History</h1>
-        <div className="empty-state">
-          <div className="empty-icon">📊</div>
+      <div className="screen history-screen animate-fade-in">
+        <h1 className="screen-title text-gradient mb-6">Analysis History</h1>
+        <div className="empty-state glass-card">
+          <div className="empty-icon-pulse">
+            <History size={48} className="text-secondary" strokeWidth={1.5} />
+          </div>
           <h2>No Analysis Yet</h2>
-          <p>Your soil analysis history will appear here</p>
+          <p className="text-tertiary">Your soil analysis history will appear here once you take your first photo.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="screen history-screen">
-      <div className="history-header">
-        <h1 className="screen-title">Analysis History</h1>
+    <div className="screen history-screen animate-fade-in">
+      <div className="header-glass mb-6">
+        <h1 className="screen-title text-gradient">History</h1>
         <div className="history-actions">
-          <button className="refresh-btn" onClick={onRefresh} title="Refresh">
-            🔄
+          <button className="icon-btn-secondary" onClick={onRefresh} title="Refresh">
+            <RefreshCw size={18} />
           </button>
-          <button className="clear-all-btn" onClick={handleClearAll} title="Clear All">
-            🗑️ Clear All
+          <button className="icon-btn-danger" onClick={handleClearAll} title="Clear All">
+            <Trash2 size={18} />
           </button>
         </div>
       </div>
-      
-      <div className="history-stats">
+
+      <div className="history-stats glass-panel mb-6">
         <div className="stat-card">
-          <span className="stat-value">{history.length}</span>
-          <span className="stat-label">Total Analyses</span>
+          <ActivitySquare size={24} className="text-primary mb-2" />
+          <span className="stat-value text-gradient-primary">{history.length}</span>
+          <span className="stat-label text-tertiary">Total Analyses</span>
         </div>
       </div>
 
       <div className="history-list">
         {history.map((item, idx) => (
-          <div 
-            key={item.id || idx} 
-            className="history-card"
+          <div
+            key={item.id || idx}
+            className="history-card glass-panel"
             onClick={() => onViewResult(item)}
           >
-            <div className="history-icon">🌱</div>
-            <div className="history-details">
-              <h3>{item.soil_type}</h3>
-              <p className="history-meta">
-                pH: {item.ph} • {new Date(item.timestamp).toLocaleDateString()}
-              </p>
-              <div className="history-crops">
-                {item.recommended_crops?.slice(0, 3).map((crop, i) => (
-                  <span key={i} className="crop-badge">{crop}</span>
-                ))}
+            <div className="history-card-inner">
+              <div className="history-icon-wrapper">
+                🌱
+              </div>
+              <div className="history-details flex-1">
+                <h3>{item.soil_type}</h3>
+                <p className="history-meta text-tertiary text-xs">
+                  pH: {item.ph} • {new Date(item.timestamp).toLocaleDateString()}
+                </p>
+                <div className="history-crops mt-2">
+                  {item.recommended_crops?.slice(0, 3).map((crop, i) => (
+                    <span key={i} className="micro-tag">{crop}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="history-card-actions">
+                <button
+                  className="icon-btn-ghost text-tertiary"
+                  onClick={(e) => handleDeleteItem(e, item)}
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
+                </button>
+                <ChevronRight size={20} className="text-tertiary" />
               </div>
             </div>
-            <button 
-              className="delete-item-btn"
-              onClick={(e) => handleDeleteItem(e, item)}
-              title="Delete"
-            >
-              ✕
-            </button>
           </div>
         ))}
       </div>

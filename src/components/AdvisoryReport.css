@@ -3,6 +3,7 @@
   max-width: 800px;
   margin: 0 auto;
   padding-bottom: 100px;
+  animation: fade-in-up 0.4s ease-out;
 }
 
 .report-header {
@@ -11,7 +12,27 @@
   gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-light);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-normal);
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-2px);
 }
 
 .report-title {
@@ -19,19 +40,32 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .report-section {
-  background: var(--surface-primary);
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-light);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-glass);
+  transition: transform var(--transition-normal), border-color var(--transition-normal);
+}
+
+.report-section:hover {
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .report-section.highlight {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 2px solid var(--primary-color);
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.1) 0%, rgba(20, 20, 25, 0.7) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
 }
 
 .report-section.collapsible {
@@ -48,6 +82,13 @@
 .section-icon {
   font-size: 1.8rem;
   flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .section-header h2 {
@@ -60,14 +101,22 @@
 
 .toggle-icon {
   font-size: 1rem;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   transition: transform 0.3s ease;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
 }
 
 .section-content {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-light);
+  cursor: default;
 }
 
 .location-section .section-content {
@@ -95,11 +144,15 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
 }
 
 .info-item .label {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 
@@ -110,22 +163,22 @@
 }
 
 .fertility-high {
-  color: #16a34a;
+  color: #34d399;
 }
 
 .fertility-medium {
-  color: #ca8a04;
+  color: #fbbf24;
 }
 
 .fertility-low {
-  color: #dc2626;
+  color: #f87171;
 }
 
 .interpretation,
 .explanation {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   margin: 12px 0 0 0;
 }
 
@@ -138,20 +191,23 @@
 }
 
 .deficiency-tag {
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 500;
+  border: 1px solid transparent;
 }
 
 .deficiency-tag.none {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
 .deficiency-tag.deficient {
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* NPK Display */
@@ -159,21 +215,22 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  background: var(--surface-secondary);
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   margin-bottom: 16px;
 }
 
 .npk-label {
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
 }
 
 .npk-value {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--primary);
 }
 
 /* Dosage Grid */
@@ -189,21 +246,22 @@
   flex-direction: column;
   gap: 6px;
   padding: 12px;
-  background: var(--surface-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   text-align: center;
 }
 
 .nutrient-name {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 
 .nutrient-dose {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--primary);
 }
 
 /* Lists */
@@ -221,6 +279,7 @@
 .mitigation-list {
   margin: 0;
   padding-left: 24px;
+  color: var(--text-secondary);
 }
 
 .schedule-list li,
@@ -230,7 +289,6 @@
 .mitigation-list li {
   margin: 8px 0;
   line-height: 1.5;
-  color: var(--text-primary);
 }
 
 /* Crop Cards */
@@ -243,22 +301,22 @@
 
 .crop-card {
   padding: 16px;
-  background: var(--surface-secondary);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  border: 2px solid var(--border-color);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid var(--border-light);
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .crop-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .crop-card h4 {
   margin: 0 0 8px 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--primary);
 }
 
 .crop-card p {
@@ -271,7 +329,7 @@
 /* Irrigation Details */
 .current-status {
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--primary);
   margin-bottom: 8px;
 }
 
@@ -281,7 +339,8 @@
   gap: 12px;
   margin: 16px 0;
   padding: 16px;
-  background: var(--surface-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
 }
 
@@ -289,11 +348,12 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  color: var(--text-primary);
 }
 
 .detail-item strong {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
 }
 
 /* Risk Cards */
@@ -308,21 +368,22 @@
   padding: 16px;
   border-radius: 12px;
   border-left: 4px solid;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .risk-card.severity-high {
-  background: #fee2e2;
-  border-color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
 }
 
 .risk-card.severity-medium {
-  background: #fef3c7;
+  background: rgba(245, 158, 11, 0.1);
   border-color: #f59e0b;
 }
 
 .risk-card.severity-low {
-  background: #dcfce7;
-  border-color: #16a34a;
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
 }
 
 .risk-header {
@@ -335,6 +396,7 @@
 .risk-type {
   font-weight: 600;
   font-size: 1rem;
+  color: var(--text-primary);
 }
 
 .risk-severity {
@@ -342,13 +404,15 @@
   border-radius: 12px;
   font-size: 0.85rem;
   font-weight: 600;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
 }
 
 .risk-description {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.4;
+  color: var(--text-secondary);
 }
 
 /* Practice Cards */
@@ -361,16 +425,16 @@
 
 .practice-card {
   padding: 16px;
-  background: var(--surface-secondary);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-light);
 }
 
 .practice-card h4 {
   margin: 0 0 12px 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--primary);
 }
 
 .practice-card p {
@@ -396,31 +460,36 @@
 }
 
 .health-badge {
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 600;
   text-transform: capitalize;
+  border: 1px solid transparent;
 }
 
 .health-badge.health-excellent {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
 .health-badge.health-good {
-  background: #d1fae5;
-  color: #065f46;
+  background: rgba(5, 150, 105, 0.1);
+  color: #10b981;
+  border-color: rgba(5, 150, 105, 0.2);
 }
 
 .health-badge.health-fair {
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.2);
 }
 
 .health-badge.health-poor {
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* Responsive */

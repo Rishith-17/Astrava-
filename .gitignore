@@ -39,3 +39,6 @@ coverage/
 # Debug files
 server/debug-*.js
 server/diagnose-*.js
+
+# Local Netlify folder
+.netlify

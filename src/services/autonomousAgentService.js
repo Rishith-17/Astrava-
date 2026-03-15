@@ -30,6 +30,8 @@ class AutonomousAgentService {
     if (this.statusCallback) {
       this.statusCallback({ step, message });
     }
+    // Broadcast to global overlay
+    window.dispatchEvent(new CustomEvent('agentStatus', { detail: { step, message } }));
   }
 
   /**
@@ -44,6 +46,7 @@ class AutonomousAgentService {
 
     this.isProcessing = true;
     this.currentLanguage = language;
+    window.dispatchEvent(new CustomEvent('agentStart'));
 
     try {
       // Step 1: Activate camera and capture image
@@ -161,6 +164,7 @@ class AutonomousAgentService {
       
     } finally {
       this.isProcessing = false;
+      window.dispatchEvent(new CustomEvent('agentEnd'));
       console.log('[Agent] Workflow ended, isProcessing set to false');
     }
   }

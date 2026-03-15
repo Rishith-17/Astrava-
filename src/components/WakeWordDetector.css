@@ -1,9 +1,19 @@
 .wake-word-detector {
   background: var(--surface-primary);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-light);
   border-radius: 16px;
   padding: 16px;
-  margin: 16px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  box-shadow: var(--shadow-glass);
+  max-width: 250px;
+  transition: opacity 1.5s ease-out, transform 1.5s ease-out;
+}
+
+.wake-word-detector.fade-out {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
 }
 
 .wake-word-header {
@@ -94,10 +104,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.5);
     opacity: 0.5;
@@ -138,9 +151,12 @@
 }
 
 @keyframes blink {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.3;
   }

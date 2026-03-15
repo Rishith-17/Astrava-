@@ -1,3 +1,4 @@
+import { Camera, MapPin, BrainCircuit, Droplets, Leaf } from 'lucide-react';
 import './HomeScreen.css';
 
 function HomeScreen({ onUpload, language }) {
@@ -47,44 +48,64 @@ function HomeScreen({ onUpload, language }) {
   };
 
   return (
-    <div className="screen home-screen">
-      <div className="hero-section">
-        <div className="hero-icon">🌾</div>
-        <h1 className="hero-title">{greetings[language]}</h1>
+    <div className="screen home-screen animate-fade-in">
+      <div className="hero-section text-center">
+        <div className="hero-badge glass-panel">
+          <Leaf className="hero-icon" size={24} />
+          <span>Smart Agriculture</span>
+        </div>
+        <h1 className="hero-title text-gradient">{greetings[language]}</h1>
         <p className="hero-subtitle">{subtitles[language]}</p>
       </div>
 
-      <div className="action-card">
-        <button className="btn btn-primary btn-large" onClick={onUpload}>
-          <span className="btn-icon">📷</span>
-          <span>{buttonTexts[language]}</span>
-        </button>
+      <div className="action-card-wrapper animate-float">
+        <div className="glass-card main-action-card">
+          <div className="action-icon-bg">
+            <Camera size={48} strokeWidth={1.5} className="text-primary" />
+          </div>
+          <button className="btn btn-primary btn-large mt-6" onClick={onUpload}>
+            <Camera size={20} />
+            <span>{buttonTexts[language]}</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="features-header">
+        <h2 className="section-title">Why use intelligent analysis?</h2>
       </div>
 
       <div className="features-grid">
-        <div className="feature-item">
-          <div className="feature-icon">🌍</div>
+        <div className="feature-item glass-panel">
+          <div className="feature-icon-wrapper blue">
+            <MapPin size={24} strokeWidth={2} />
+          </div>
           <div className="feature-text">
             <h3>GPS Based</h3>
             <p>Location-specific soil data</p>
           </div>
         </div>
-        <div className="feature-item">
-          <div className="feature-icon">🔬</div>
+        <div className="feature-item glass-panel">
+          <div className="feature-icon-wrapper purple">
+            <BrainCircuit size={24} strokeWidth={2} />
+          </div>
           <div className="feature-text">
             <h3>AI Analysis</h3>
             <p>Smart soil classification</p>
           </div>
         </div>
-        <div className="feature-item">
-          <div className="feature-icon">💊</div>
+        <div className="feature-item glass-panel">
+          <div className="feature-icon-wrapper emerald">
+            <Droplets size={24} strokeWidth={2} />
+          </div>
           <div className="feature-text">
             <h3>Fertilizer Tips</h3>
             <p>Personalized recommendations</p>
           </div>
         </div>
-        <div className="feature-item">
-          <div className="feature-icon">🌱</div>
+        <div className="feature-item glass-panel">
+          <div className="feature-icon-wrapper orange">
+            <Leaf size={24} strokeWidth={2} />
+          </div>
           <div className="feature-text">
             <h3>Crop Advice</h3>
             <p>Best crops for your soil</p>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { analyzeSoil } from '../services/soilService';
 import CameraCapture from './CameraCapture';
+import { Camera, UploadCloud, RefreshCw, ChevronLeft, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import './UploadScreen.css';
 
 function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhotoProcessed }) {
@@ -9,30 +10,48 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showCamera, setShowCamera] = useState(false);
-  
+  const [isDragging, setIsDragging] = useState(false);
+
   const galleryInputRef = useRef(null);
 
   useEffect(() => {
-    // Handle voice-captured photo from props
     if (voiceCapturedPhoto) {
-      console.log('Processing voice-captured photo:', voiceCapturedPhoto.name);
       setImage(voiceCapturedPhoto);
       setPreview(URL.createObjectURL(voiceCapturedPhoto));
       setError(null);
-      
-      // Notify parent that photo has been processed
-      if (onPhotoProcessed) {
-        onPhotoProcessed();
-      }
+      if (onPhotoProcessed) onPhotoProcessed();
     }
   }, [voiceCapturedPhoto, onPhotoProcessed]);
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    validateAndSetFile(file);
+  };
+
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
-    if (file) {
+    validateAndSetFile(file);
+  };
+
+  const validateAndSetFile = (file) => {
+    if (file && file.type.startsWith('image/')) {
       setImage(file);
       setPreview(URL.createObjectURL(file));
       setError(null);
+    } else {
+      setError('Please select a valid image file.');
     }
   };
 
@@ -44,12 +63,7 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
   };
 
   const handleAnalyze = async () => {
-    console.log('🔍 Analyze button clicked!');
-    console.log('Image:', image);
-    console.log('Language:', language);
-    
     if (!image) {
-      console.error('❌ No image selected');
       setError('No image selected. Please select an image first.');
       return;
     }
@@ -58,12 +72,9 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
     setError(null);
 
     try {
-      console.log('📤 Sending image to backend...');
       const result = await analyzeSoil(image, language);
-      console.log('✅ Analysis complete:', result);
       onComplete(result);
     } catch (err) {
-      console.error('❌ Analysis error:', err);
       setError(err.message || 'Analysis failed. Please try again.');
     } finally {
       setLoading(false);
@@ -77,13 +88,15 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
   };
 
   return (
-    <div className="screen upload-screen">
-      <div className="upload-header">
-        <button className="back-btn" onClick={onBack}>←</button>
-        <h1 className="upload-title">Capture Soil Photo</h1>
+    <div className="screen upload-screen animate-fade-in">
+      <div className="header-glass">
+        <button className="icon-btn-back" onClick={onBack}>
+          <ChevronLeft size={24} />
+        </button>
+        <h1 className="screen-title text-gradient">Capture Soil</h1>
+        <div style={{ width: 24 }}></div> {/* Spacer for alignment */}
       </div>
-      
-      {/* Gallery input - opens file picker */}
+
       <input
         ref={galleryInputRef}
         type="file"
@@ -93,71 +106,82 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
       />
 
       {!preview && (
-        <>
-          <div className="upload-options">
-            <button className="option-card" onClick={() => setShowCamera(true)}>
-              <div className="option-icon">📷</div>
-              <h3>Take Photo</h3>
-              <p>Open camera to capture soil</p>
-            </button>
-            
-            <button className="option-card" onClick={() => galleryInputRef.current.click()}>
-              <div className="option-icon">🖼️</div>
-              <h3>Upload from Gallery</h3>
-              <p>Select existing photo</p>
-            </button>
+        <div className="upload-container">
+          <div
+            className={`drag-drop-zone glass-panel ${isDragging ? 'dragging' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => galleryInputRef.current.click()}
+          >
+            <div className="upload-icon-pulse">
+              <UploadCloud size={48} className="text-primary" />
+            </div>
+            <h3>Upload Soil Photo</h3>
+            <p>Drag and drop or click to browse</p>
           </div>
-          
+
+          <div className="divider">
+            <span>OR</span>
+          </div>
+
+          <button className="btn btn-secondary btn-large" onClick={() => setShowCamera(true)}>
+            <Camera size={20} />
+            <span>Open Camera</span>
+          </button>
+
           {error && (
-            <div className="error-message">
-              ⚠️ {error}
+            <div className="alert-glass error-alert mt-4">
+              <AlertCircle size={20} />
+              <span>{error}</span>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {preview && (
-        <div className="preview-area">
-          <img src={preview} alt="Soil preview" />
-          
+        <div className="preview-container">
+          <div className="image-preview-card glass-panel">
+            <img src={preview} alt="Soil preview" />
+            <div className="preview-overlay">
+              <ImageIcon size={24} />
+              <span>Soil Sample Ready</span>
+            </div>
+          </div>
+
           {error && (
-            <div className="error-message" style={{ 
-              background: '#fee2e2', 
-              color: '#dc2626', 
-              padding: '1rem', 
-              borderRadius: '8px', 
-              marginBottom: '1rem',
-              fontWeight: '600'
-            }}>
-              ⚠️ {error}
+            <div className="alert-glass error-alert mt-4">
+              <AlertCircle size={20} />
+              <span>{error}</span>
             </div>
           )}
-          
-          <div className="preview-actions">
-            <button className="btn-retake" onClick={resetUpload}>
-              🔄 Retake
+
+          <div className="action-row mt-6">
+            <button className="btn btn-secondary flex-1" onClick={resetUpload}>
+              <RefreshCw size={18} />
+              <span>Retake</span>
             </button>
-            <button 
-              className="btn btn-primary"
+            <button
+              className="btn btn-primary flex-2"
               onClick={handleAnalyze}
               disabled={loading}
             >
-              {loading ? 'Analyzing...' : '🔍 Analyze'}
+              {loading ? (
+                <>
+                  <div className="spinner-small" />
+                  <span>Analyzing...</span>
+                </>
+              ) : (
+                <>
+                  <BrainCircuit size={18} />
+                  <span>Analyze Soil</span>
+                </>
+              )}
             </button>
           </div>
         </div>
       )}
 
-      {loading && (
-        <div className="loading-overlay">
-          <div className="loading">
-            <div className="spinner"></div>
-            <p>Analyzing your soil...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Camera Capture Modal */}
       {showCamera && (
         <CameraCapture
           onCapture={handleCameraCapture}
@@ -167,5 +191,8 @@ function UploadScreen({ onComplete, onBack, language, voiceCapturedPhoto, onPhot
     </div>
   );
 }
+
+// Need to import BrainCircuit since it is used in the analyze button
+import { BrainCircuit } from 'lucide-react';
 
 export default UploadScreen;

@@ -8,6 +8,7 @@ import MarketWeatherScreen from './components/MarketWeatherScreen';
 import BottomNav from './components/BottomNav';
 import VoiceAssistant from './components/VoiceAssistant';
 import CameraCapture from './components/CameraCapture';
+import AgentProcessingOverlay from './components/AgentProcessingOverlay';
 import databaseService from './services/database';
 import './App.css';
 
@@ -20,6 +21,8 @@ function App() {
   const [voiceCapturedPhoto, setVoiceCapturedPhoto] = useState(null);
   const [showCameraCapture, setShowCameraCapture] = useState(false);
   const [cameraCallbacks, setCameraCallbacks] = useState(null);
+  const [agentProcessing, setAgentProcessing] = useState(false);
+  const [agentStatus, setAgentStatus] = useState({ step: 1, message: '' });
 
   useEffect(() => {
     // Load data from database
@@ -45,12 +48,29 @@ function App() {
       setCameraCallbacks(null);
     };
 
+    const handleAgentStart = () => {
+      setAgentProcessing(true);
+      setAgentStatus({ step: 1, message: 'Starting...' });
+    };
+    const handleAgentStatus = (e) => {
+      setAgentStatus(e.detail);
+    };
+    const handleAgentEnd = () => {
+      setAgentProcessing(false);
+    };
+
     window.addEventListener('openCameraCapture', handleCameraCapture);
     window.addEventListener('closeCameraCapture', handleCloseCameraModal);
+    window.addEventListener('agentStart', handleAgentStart);
+    window.addEventListener('agentStatus', handleAgentStatus);
+    window.addEventListener('agentEnd', handleAgentEnd);
 
     return () => {
       window.removeEventListener('openCameraCapture', handleCameraCapture);
       window.removeEventListener('closeCameraCapture', handleCloseCameraModal);
+      window.removeEventListener('agentStart', handleAgentStart);
+      window.removeEventListener('agentStatus', handleAgentStatus);
+      window.removeEventListener('agentEnd', handleAgentEnd);
     };
   }, []);
 
@@ -278,6 +298,14 @@ function App() {
           onCapture={handleCameraCapture}
           onClose={handleCameraClose}
           autoCapture={cameraCallbacks?.autoCapture || false}
+        />
+      )}
+
+      {/* Agent Processing Overlay — only show after photo is captured (step 2+) */}
+      {agentProcessing && agentStatus.step >= 2 && (
+        <AgentProcessingOverlay
+          currentStep={agentStatus.step}
+          message={agentStatus.message}
         />
       )}
     </div>

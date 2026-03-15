@@ -187,50 +187,80 @@ class MarketPriceService extends BaseAPIService {
    */
   generateMockMarketData(cropName, state) {
     const basePrice = this.getBasePriceForCrop(cropName);
-    const currentPrice = basePrice + (Math.random() * 200 - 100);
-    const previousPrice = currentPrice - (Math.random() * 50 - 25);
-    const priceChange = currentPrice - previousPrice;
-    const percentageChange = ((priceChange / previousPrice) * 100).toFixed(2);
-
-    // Generate 90 days of price data
+    
+    // Generate 90 days of realistic price data with trends
     const priceHistory = [];
-    let price = currentPrice - 500;
+    const today = new Date();
+    
+    // Start with a base price 90 days ago
+    let price = basePrice - 300 + (Math.random() * 200);
+    
+    // Create realistic price movements over 90 days
     for (let i = 90; i >= 0; i--) {
-      const date = new Date();
+      const date = new Date(today);
       date.setDate(date.getDate() - i);
-      price += (Math.random() * 100 - 50);
+      
+      // Add realistic price variation (trend + random fluctuation)
+      const trendFactor = (90 - i) / 90; // Gradual trend over time
+      const seasonalFactor = Math.sin((90 - i) / 15) * 50; // Seasonal variation
+      const randomFactor = (Math.random() - 0.5) * 80; // Daily fluctuation
+      
+      price = basePrice + (trendFactor * 200) + seasonalFactor + randomFactor;
+      
+      // Ensure price stays within reasonable bounds
+      price = Math.max(basePrice * 0.7, Math.min(basePrice * 1.3, price));
+      
+      const dayPrice = Math.round(price);
+      
       priceHistory.push({
         date: date.toISOString().split('T')[0],
-        price: Math.round(price),
-        minPrice: Math.round(price - 50),
-        maxPrice: Math.round(price + 50),
+        price: dayPrice,
+        minPrice: Math.round(dayPrice - (Math.random() * 50 + 20)),
+        maxPrice: Math.round(dayPrice + (Math.random() * 50 + 20)),
         volume: Math.round(Math.random() * 1000 + 500)
       });
     }
 
+    // Get current and previous prices from generated history
+    const currentPrice = priceHistory[priceHistory.length - 1].price;
+    const previousPrice = priceHistory[priceHistory.length - 2].price;
+    const priceChange = currentPrice - previousPrice;
+    const percentageChange = ((priceChange / previousPrice) * 100).toFixed(2);
+
+    // Generate varied market locations with realistic price differences
+    const locations = [
+      { name: 'Meghraj APMC, Sabarkantha', state: 'Gujarat' },
+      { name: 'Dholka APMC, Ahmedabad', state: 'Gujarat' },
+      { name: 'Bagasara APMC, Amreli', state: 'Gujarat' },
+      { name: 'Veraval APMC, Gir Somnath', state: 'Gujarat' },
+      { name: 'Madanganj Kishangarh APMC, Ajmer', state: 'Rajasthan' }
+    ];
+
+    const marketLocations = locations.map(loc => ({
+      name: loc.name,
+      price: Math.round(currentPrice + (Math.random() * 400 - 200)),
+      state: loc.state
+    }));
+
     return {
       crop: cropName,
       variety: 'General',
-      state: state || 'Karnataka',
-      market: 'APMC Market',
-      district: 'Bangalore',
-      currentPrice: Math.round(currentPrice),
-      previousPrice: Math.round(previousPrice),
-      minPrice: Math.round(currentPrice - 100),
-      maxPrice: Math.round(currentPrice + 100),
+      state: state || 'Gujarat',
+      market: marketLocations[0].name.split(',')[0],
+      district: marketLocations[0].name.split(',')[1]?.trim() || 'District',
+      currentPrice: currentPrice,
+      previousPrice: previousPrice,
+      minPrice: priceHistory[priceHistory.length - 1].minPrice,
+      maxPrice: priceHistory[priceHistory.length - 1].maxPrice,
       priceChange: Math.round(priceChange),
       percentageChange: parseFloat(percentageChange),
       unit: 'Rs/Quintal',
-      lastUpdated: new Date().toISOString().split('T')[0],
+      lastUpdated: priceHistory[priceHistory.length - 1].date,
       arrivals: Math.round(Math.random() * 5000 + 1000),
       priceHistory: priceHistory,
       weeklyTrend: priceHistory.slice(-7),
       monthlyTrend: priceHistory.slice(-30),
-      marketLocations: [
-        { name: 'Bangalore APMC', price: Math.round(currentPrice + 50), state: 'Karnataka' },
-        { name: 'Mysore Market', price: Math.round(currentPrice - 30), state: 'Karnataka' },
-        { name: 'Hubli Mandi', price: Math.round(currentPrice + 20), state: 'Karnataka' }
-      ],
+      marketLocations: marketLocations,
       source: 'Mock Data'
     };
   }
