@@ -24,7 +24,7 @@ function CropMarketTrends({ language }) {
   const searchCrops = async (query) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/api/market/search?query=${encodeURIComponent(query)}`
+        `/api/market/search?query=${encodeURIComponent(query)}`
       );
       const data = await response.json();
       setSearchResults(data.crops);
@@ -45,19 +45,16 @@ function CropMarketTrends({ language }) {
 
     try {
       const response = await fetch(
-        `http://localhost:3001/api/market/price/${encodeURIComponent(cropName)}`
+        `/api/market/price/${encodeURIComponent(cropName)}`
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-
-      // Check if data has error
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      if (data.error) throw new Error(data.error);
 
       setMarketData(data);
 
@@ -106,7 +103,7 @@ function CropMarketTrends({ language }) {
       const explanation = `Market analysis for ${marketData.crop}. Current price is ${marketData.currentPrice} rupees per quintal. Price is ${trend} by ${Math.abs(marketData.percentageChange)} percent. ${marketData.priceChange > 0 ? 'This is a good time to sell.' : 'Consider waiting for better prices.'}`;
 
       // Translate to user's language
-      const translateResponse = await fetch('http://localhost:3001/api/translate', {
+      const translateResponse = await fetch('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -118,7 +115,7 @@ function CropMarketTrends({ language }) {
       const { translatedText } = await translateResponse.json();
 
       // Convert to speech
-      const ttsResponse = await fetch('http://localhost:3001/api/tts', {
+      const ttsResponse = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

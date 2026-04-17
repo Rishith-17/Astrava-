@@ -16,6 +16,7 @@ function ResultScreen({ result, onBack, language }) {
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [currentChunk, setCurrentChunk] = useState(0);
   const audioRef = useRef(null);
+  const stopRequestedRef = useRef(false); // flag to interrupt audio loop
 
   useEffect(() => {
     if (result.isAgenticWorkflow && result.audioBlobs && result.audioBlobs.length > 0) {
@@ -27,52 +28,42 @@ function ResultScreen({ result, onBack, language }) {
   }, [result]);
 
   const stopAllAudio = () => {
+    stopRequestedRef.current = true;
+    sarvamVoiceService.stopAudio();
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current = null;
     }
     setAudioPlaying(false);
+    setSpeaking(false);
     setCurrentChunk(0);
   };
 
   const playAgenticAudio = async () => {
     if (!result.audioBlobs || result.audioBlobs.length === 0) return;
+    stopRequestedRef.current = false;
     setAudioPlaying(true);
 
     try {
       for (let i = 0; i < result.audioBlobs.length; i++) {
-        if (!audioPlaying && i > 0) break;
+        if (stopRequestedRef.current) break;
 
         setCurrentChunk(i + 1);
-        const audioUrl = URL.createObjectURL(result.audioBlobs[i]);
-        const audio = new Audio(audioUrl);
-        audioRef.current = audio;
+        await sarvamVoiceService.playAudio(result.audioBlobs[i]);
 
-        await new Promise((resolve, reject) => {
-          audio.onended = () => {
-            URL.revokeObjectURL(audioUrl);
-            audioRef.current = null;
-            resolve();
-          };
-          audio.onerror = (error) => {
-            URL.revokeObjectURL(audioUrl);
-            audioRef.current = null;
-            reject(error);
-          };
-          audio.play().catch(reject);
-        });
-
+        if (stopRequestedRef.current) break;
         if (i < result.audioBlobs.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
       }
     } catch (error) {
-      console.error('[ResultScreen] Audio playback error:', error);
+      if (!stopRequestedRef.current) {
+        console.error('[ResultScreen] Audio playback error:', error);
+      }
     } finally {
       setAudioPlaying(false);
       setCurrentChunk(0);
-      audioRef.current = null;
     }
   };
 
@@ -257,20 +248,48 @@ function ResultScreen({ result, onBack, language }) {
     URL.revokeObjectURL(url);
   };
 
-  const handleSpeak = () => {
-    if ('speechSynthesis' in window) {
-      const text = result.advice || `Soil type: ${result.soil_type}. pH: ${result.ph}. ${result.fertilizer}`;
-      const utterance = new SpeechSynthesisUtterance(text);
+  const handleSpeak = async () => {
+    if (speaking) {
+      stopAllAudio();
+      return;
+    }
 
-      const langMap = {
-        'kn': 'kn-IN', 'hi': 'hi-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'en': 'en-IN'
-      };
+    setSpeaking(true);
+    stopRequestedRef.current = false;
+    try {
+      const textToSpeak = analysis.advice ||
+        `Soil type is ${analysis.soil_type}. pH level is ${analysis.ph}. ${analysis.fertilizer}. Recommended crops are ${analysis.recommended_crops?.join(', ')}.`;
 
-      utterance.lang = langMap[language] || 'en-IN';
-      utterance.onstart = () => setSpeaking(true);
-      utterance.onend = () => setSpeaking(false);
+      let finalText = textToSpeak;
+      if (language !== 'en') {
+        const translateRes = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: textToSpeak, targetLanguage: language })
+        });
+        const { translatedText } = await translateRes.json();
+        if (translatedText) finalText = translatedText;
+      }
 
-      window.speechSynthesis.speak(utterance);
+      const chunks = [];
+      for (let i = 0; i < finalText.length; i += 400) chunks.push(finalText.slice(i, i + 400));
+
+      for (const chunk of chunks) {
+        if (stopRequestedRef.current) break;
+        const ttsRes = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: chunk, language })
+        });
+        if (!ttsRes.ok) throw new Error('TTS failed');
+        const blob = await ttsRes.blob();
+        if (stopRequestedRef.current) break;
+        await sarvamVoiceService.playAudio(blob);
+      }
+    } catch (err) {
+      if (!stopRequestedRef.current) console.error('TTS error:', err);
+    } finally {
+      setSpeaking(false);
     }
   };
 

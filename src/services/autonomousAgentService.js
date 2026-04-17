@@ -63,12 +63,37 @@ class AutonomousAgentService {
       const analysisResult = await analyzeSoil(imageFile, language);
       console.log('[Agent] Analysis complete:', analysisResult);
 
-      // Step 3: Generate comprehensive explanation for TTS
+      // Step 3: Generate comprehensive explanation for TTS in selected language
       this.updateStatus(3, 'Generating explanation...');
-      console.log('[Agent] Step 3: Generating comprehensive explanation for TTS');
       
-      const explanation = this.generateComprehensiveExplanation(analysisResult, language);
-      console.log('[Agent] Explanation generated:', explanation.substring(0, 150) + '...');
+      // Generate explanation in English first
+      let explanation = this.generateComprehensiveExplanation(analysisResult, language);
+
+      // ALWAYS translate if not English - ensure complete translation
+      if (language !== 'en') {
+        this.updateStatus(3, 'Translating to your language...');
+        try {
+          // Split into chunks for translation if needed
+          const chunks = this.splitIntoChunks(explanation, 900);
+          const translatedChunks = [];
+          
+          for (const chunk of chunks) {
+            const translateRes = await fetch('/api/translate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: chunk, targetLanguage: language })
+            });
+            const { translatedText } = await translateRes.json();
+            translatedChunks.push(translatedText || chunk);
+          }
+          
+          explanation = translatedChunks.join(' ');
+          console.log('[Agent] Translation complete, length:', explanation.length);
+        } catch (e) {
+          console.error('[Agent] Translation failed:', e.message);
+          // Don't fallback to English - try to continue with partial translation
+        }
+      }
 
       // Step 4: Convert to speech in chunks via backend
       this.updateStatus(4, 'Converting to speech...');
@@ -86,7 +111,7 @@ class AutonomousAgentService {
           this.updateStatus(4, `Converting to speech (${i + 1}/${chunks.length})...`);
           
           // Call backend TTS endpoint
-          const response = await fetch('http://localhost:3001/api/tts', {
+          const response = await fetch('/api/tts', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -116,43 +141,40 @@ class AutonomousAgentService {
         // Continue without audio - don't fail the whole workflow
       }
 
-      // Step 5: Return results and play audio chunks
+      // Step 5: Show results FIRST — hide overlay, display report
       this.updateStatus(5, 'Displaying results...');
-      console.log('[Agent] Step 5: Returning results to UI');
-      
-      // Return results to UI with agentic flag (use regular card format, not paragraph)
+
+      // Dispatch agentEnd NOW so overlay closes
+      window.dispatchEvent(new CustomEvent('agentEnd'));
+
+      // Show results immediately
       if (this.resultCallback) {
-        console.log('[Agent] Calling result callback');
         this.resultCallback({
           analysis: analysisResult,
-          audioBlobs: audioBlobs, // Array of audio blobs
-          isAgenticWorkflow: true // Flag to indicate this is from autonomous agent
+          audioBlobs: audioBlobs,
+          isAgenticWorkflow: true
         });
-      } else {
-        console.error('[Agent] No result callback set!');
       }
 
-      // Play audio chunks sequentially if available
+      // Wait for result screen to fully render
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Step 6: Play audio AFTER results are visible
       if (audioBlobs.length > 0) {
-        console.log('[Agent] Playing', audioBlobs.length, 'audio chunks');
-        this.updateStatus(5, 'Speaking results...');
-        
+        this.updateStatus(6, 'Playing audio report...');
         for (let i = 0; i < audioBlobs.length; i++) {
-          console.log(`[Agent] Playing chunk ${i + 1}/${audioBlobs.length}`);
           try {
             await sarvamVoiceService.playAudio(audioBlobs[i]);
             // Small pause between chunks
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 300));
           } catch (audioError) {
-            console.warn(`[Agent] Audio chunk ${i + 1} playback failed:`, audioError.message);
+            console.error('[Agent] Audio playback error:', audioError);
+            break;
           }
         }
-      } else {
-        console.log('[Agent] No audio to play (TTS failed)');
       }
 
-      this.updateStatus(6, 'Complete!');
-      console.log('[Agent] Workflow complete!');
+      this.updateStatus(7, 'Complete!');
       
     } catch (error) {
       console.error('[Agent] Workflow error:', error);

@@ -5,11 +5,21 @@
 
 import axios from 'axios';
 import logger from '../utils/logger.js';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: join(__dirname, '../.env') });
+dotenv.config({ path: join(__dirname, '../../.env') });
 
 class SarvamTTSService {
   constructor() {
-    this.apiKey = process.env.SARVAM_API_KEY;
     this.baseUrl = 'https://api.sarvam.ai';
+    Object.defineProperty(this, 'apiKey', {
+      get: () => process.env.SARVAM_API_KEY,
+      configurable: true
+    });
   }
 
   /**

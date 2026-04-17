@@ -2,9 +2,9 @@
 node_modules/
 server/node_modules/
 
-# Environment variables
-.env
-server/.env
+# Environment variables (tracked intentionally for deployment)
+# .env
+# server/.env
 
 # Build outputs
 dist/
@@ -42,3 +42,5 @@ server/diagnose-*.js
 
 # Local Netlify folder
 .netlify
+
+.vercel

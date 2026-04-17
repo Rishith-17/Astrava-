@@ -1,5 +1,12 @@
 import axios from 'axios';
 import FormData from 'form-data';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: join(__dirname, '.env') });
+dotenv.config({ path: join(__dirname, '../.env') });
 
 /**
  * Analyze soil image using ML model via ngrok endpoint
@@ -8,40 +15,35 @@ import FormData from 'form-data';
  */
 export async function analyzeSoilImage(imageBuffer) {
   const SOIL_API_URL = process.env.SOIL_CLASSIFY_API_URL;
-  
-  // If no API URL configured, use mock data
-  if (!SOIL_API_URL || SOIL_API_URL.includes('your-ngrok-url')) {
-    console.warn('Soil classification API not configured, using mock data');
-    return getMockSoilAnalysis();
+
+  if (!SOIL_API_URL) {
+    throw new Error('SOIL_CLASSIFY_API_URL is not configured in .env');
   }
 
   try {
-    // Create form data with image
+    console.log(`[ML] Sending image to FastAPI: ${SOIL_API_URL} (${imageBuffer.length} bytes)`);
     const formData = new FormData();
-    // Try 'file' field first (FastAPI default), fallback to 'image'
     formData.append('file', imageBuffer, {
       filename: 'soil.jpg',
       contentType: 'image/jpeg'
     });
 
-    // Send to ngrok ML model endpoint
     const response = await axios.post(SOIL_API_URL, formData, {
       headers: {
         ...formData.getHeaders(),
-        'ngrok-skip-browser-warning': 'true' // Skip ngrok browser warning
+        'ngrok-skip-browser-warning': 'true'
       },
-      timeout: 30000, // 30 second timeout for ML inference
-      maxContentLength: 5 * 1024 * 1024, // 5MB max
+      timeout: 30000,
+      maxContentLength: 5 * 1024 * 1024,
       maxBodyLength: 5 * 1024 * 1024
     });
 
-    // Validate response structure
     if (!response.data || !response.data.soil_type) {
-      console.error('Invalid response from soil classification API:', response.data);
-      return getMockSoilAnalysis();
+      throw new Error(`Invalid response from ML model: ${JSON.stringify(response.data)}`);
     }
 
-    // Return the ML model prediction
+    console.log(`[ML] FastAPI result: ${response.data.soil_type} (confidence: ${response.data.confidence})`);
+
     return {
       soil_type: response.data.soil_type,
       confidence: response.data.confidence || 0.0,
@@ -51,48 +53,15 @@ export async function analyzeSoilImage(imageBuffer) {
     };
 
   } catch (error) {
-    console.error('Soil classification API error:', error.message);
-    
-    // Log more details for debugging
     if (error.response) {
-      console.error('API Response Status:', error.response.status);
-      console.error('API Response Data:', error.response.data);
+      console.error('ML API Response Status:', error.response.status);
+      console.error('ML API Response Data:', error.response.data);
+      throw new Error(`Soil classification API error (${error.response.status}): ${JSON.stringify(error.response.data)}`);
     } else if (error.request) {
-      console.error('No response received from API');
+      throw new Error('Soil classification API is unreachable. Check your ngrok URL and ML model server.');
     }
-    
-    // Fallback to mock data
-    console.warn('Falling back to mock soil analysis');
-    return getMockSoilAnalysis();
+    throw error;
   }
-}
-
-/**
- * Generate mock soil analysis for development/fallback
- * @returns {Object} Mock soil analysis
- */
-function getMockSoilAnalysis() {
-  const mockTypes = [
-    { type: 'Black Soil', ph: 6.5, confidence: 0.89 },
-    { type: 'Red Soil', ph: 6.2, confidence: 0.85 },
-    { type: 'Alluvial Soil', ph: 7.0, confidence: 0.92 },
-    { type: 'Laterite Soil', ph: 5.8, confidence: 0.87 },
-    { type: 'Sandy Soil', ph: 6.8, confidence: 0.83 }
-  ];
-  
-  const selected = mockTypes[Math.floor(Math.random() * mockTypes.length)];
-  
-  return {
-    soil_type: selected.type,
-    confidence: selected.confidence,
-    ph_level: selected.ph,
-    nutrient_status: {
-      nitrogen: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
-      phosphorus: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
-      potassium: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
-    },
-    fertilizer_recommendation: 'NPK 20:20:20 at 40-50 kg/acre'
-  };
 }
 
 // Get soil data from SoilGrids API
@@ -206,4 +175,3 @@ function getLanguageCode(lang) {
   };
   return map[lang] || 'en-IN';
 }
-9019493289

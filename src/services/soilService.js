@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB — send original for best ML accuracy
 const ALLOWED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png'];
 
 /**
@@ -86,27 +86,20 @@ export async function analyzeSoil(imageFile, language = 'en') {
   try {
     // Step 1: Validate image
     validateImage(imageFile);
-    
-    // Step 2: Compress image if needed
-    let processedImage = imageFile;
-    if (imageFile.size > 1024 * 1024) { // Compress if > 1MB
-      console.log('Compressing image...');
-      const compressed = await compressImage(imageFile);
-      processedImage = new File([compressed], imageFile.name, { type: 'image/jpeg' });
-    }
-    
-    // Step 3: Get GPS location
+
+    // Step 2: Get GPS location
     const location = await getLocation();
-    
-    // Step 4: Upload image for classification
+
+    // Step 3: Send original image directly — no compression, preserves color accuracy for ML model
     const formData = new FormData();
-    formData.append('image', processedImage);
+    formData.append('image', imageFile);
     formData.append('latitude', location.latitude);
     formData.append('longitude', location.longitude);
     formData.append('language', language);
 
     console.log('Sending soil analysis request...', {
-      imageSize: processedImage.size,
+      imageSize: imageFile.size,
+      imageType: imageFile.type,
       location
     });
 

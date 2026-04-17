@@ -12,8 +12,12 @@ class MarketPriceService extends BaseAPIService {
   constructor() {
     super('market_price');
     this.baseUrl = 'https://api.data.gov.in/resource';
-    this.resourceId = '9ef84268-d588-465a-a308-a864a43d0070'; // Variety-wise Daily Market Prices
-    this.apiKey = process.env.GOV_INDIA_API_KEY;
+    this.resourceId = '9ef84268-d588-465a-a308-a864a43d0070';
+    // Read lazily so dotenv is loaded before this is accessed
+    Object.defineProperty(this, 'apiKey', {
+      get: () => process.env.GOV_INDIA_API_KEY,
+      configurable: true
+    });
   }
 
   /**
@@ -53,52 +57,21 @@ class MarketPriceService extends BaseAPIService {
       console.log('API Response records count:', response.data?.records?.length || 0);
 
       if (response.data && response.data.records && response.data.records.length > 0) {
-        // Process real API data
         const processedData = this.processGovAPIData(response.data.records, cropName);
-        
-        logger.info('Successfully processed Gov API data', { 
-          cropName, 
-          recordCount: response.data.records.length 
-        });
-        
-        return {
-          success: true,
-          data: processedData
-        };
+        logger.info('Successfully processed Gov API data', { cropName, recordCount: response.data.records.length });
+        return { success: true, data: processedData };
       } else {
-        // Fallback to mock data if no records found
-        logger.warn('No records found in Gov API, using mock data', { cropName });
-        console.log('No records found, using mock data');
-        const mockData = this.generateMockMarketData(cropName, state);
-        
-        return {
-          success: true,
-          data: mockData,
-          source: 'mock'
-        };
+        logger.warn('No records found in Gov API for crop', { cropName });
+        return { success: false, error: `No market data found for "${cropName}". Try a different crop name.` };
       }
 
     } catch (error) {
-      logger.error('Market price fetch failed', {
-        error: error.message,
-        cropName,
-        stack: error.stack
-      });
-      
+      logger.error('Market price fetch failed', { error: error.message, cropName });
       console.error('Market API Error:', error.message);
       if (error.response) {
         console.error('Error response:', error.response.status, error.response.data);
       }
-
-      // Fallback to mock data on error
-      const mockData = this.generateMockMarketData(cropName, state);
-      
-      return {
-        success: true,
-        data: mockData,
-        source: 'mock',
-        error: error.message
-      };
+      return { success: false, error: `Market API error: ${error.message}` };
     }
   }
 

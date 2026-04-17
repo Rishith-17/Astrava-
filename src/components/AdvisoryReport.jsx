@@ -53,29 +53,29 @@ function AdvisoryReport({ report, onBack, language = 'en' }) {
           <div className="section-content">
             <div className="info-grid">
               <div className="info-item">
-                <span className="label">Soil Type:</span>
+                <span className="label">{t('soil_type_label', language)}:</span>
                 <span className="value">{sections.soil_analysis.soil_type}</span>
               </div>
               <div className="info-item">
-                <span className="label">Texture:</span>
+                <span className="label">{t('texture', language)}:</span>
                 <span className="value">{sections.soil_analysis.texture}</span>
               </div>
               <div className="info-item">
-                <span className="label">Confidence:</span>
+                <span className="label">{t('confidence', language)}:</span>
                 <span className="value">{sections.soil_analysis.confidence}</span>
               </div>
               <div className="info-item">
-                <span className="label">Fertility:</span>
+                <span className="label">{t('fertility', language)}:</span>
                 <span className={`value fertility-${sections.soil_analysis.fertility}`}>
                   {sections.soil_analysis.fertility}
                 </span>
               </div>
               <div className="info-item">
-                <span className="label">pH Status:</span>
+                <span className="label">{t('ph_status', language)}:</span>
                 <span className="value">{sections.soil_analysis.ph_status}</span>
               </div>
               <div className="info-item">
-                <span className="label">Organic Matter:</span>
+                <span className="label">{t('organic_matter', language)}:</span>
                 <span className="value">{sections.soil_analysis.organic_matter}</span>
               </div>
             </div>
@@ -115,32 +115,32 @@ function AdvisoryReport({ report, onBack, language = 'en' }) {
         {expandedSections.fertilizer_recommendation && (
           <div className="section-content">
             <div className="npk-display">
-              <span className="npk-label">NPK Ratio:</span>
+              <span className="npk-label">{t('npk_ratio', language)}:</span>
               <span className="npk-value">{sections.fertilizer_recommendation.npk_ratio}</span>
             </div>
             <div className="dosage-grid">
               <div className="dosage-item">
-                <span className="nutrient-name">Nitrogen (N)</span>
+                <span className="nutrient-name">{t('nitrogen', language)} (N)</span>
                 <span className="nutrient-dose">{sections.fertilizer_recommendation.dosage.nitrogen}</span>
               </div>
               <div className="dosage-item">
-                <span className="nutrient-name">Phosphorus (P)</span>
+                <span className="nutrient-name">{t('phosphorus', language)} (P)</span>
                 <span className="nutrient-dose">{sections.fertilizer_recommendation.dosage.phosphorus}</span>
               </div>
               <div className="dosage-item">
-                <span className="nutrient-name">Potassium (K)</span>
+                <span className="nutrient-name">{t('potassium', language)} (K)</span>
                 <span className="nutrient-dose">{sections.fertilizer_recommendation.dosage.potassium}</span>
               </div>
             </div>
             
-            <h3>Application Schedule</h3>
+            <h3>{t('application_schedule', language)}</h3>
             <ol className="schedule-list">
               {sections.fertilizer_recommendation.schedule.map((step, idx) => (
                 <li key={idx}>{step}</li>
               ))}
             </ol>
 
-            <h3>Organic Alternatives</h3>
+            <h3>{t('organic_alternatives', language)}</h3>
             <ul className="organic-list">
               {sections.fertilizer_recommendation.organic_options.map((option, idx) => (
                 <li key={idx}>{option}</li>
@@ -149,7 +149,7 @@ function AdvisoryReport({ report, onBack, language = 'en' }) {
 
             {sections.fertilizer_recommendation.specific_recommendations.length > 0 && (
               <>
-                <h3>Specific Recommendations</h3>
+                <h3>{t('specific_recommendations', language)}</h3>
                 <ul className="recommendations-list">
                   {sections.fertilizer_recommendation.specific_recommendations.map((rec, idx) => (
                     <li key={idx}>{rec}</li>
@@ -197,20 +197,20 @@ function AdvisoryReport({ report, onBack, language = 'en' }) {
             
             <div className="irrigation-details">
               <div className="detail-item">
-                <strong>Timing:</strong> {sections.irrigation_advice.timing}
+                <strong>{t('timing', language)}:</strong> {sections.irrigation_advice.timing}
               </div>
               <div className="detail-item">
-                <strong>Frequency:</strong> {sections.irrigation_advice.frequency}
+                <strong>{t('frequency', language)}:</strong> {sections.irrigation_advice.frequency}
               </div>
               <div className="detail-item">
-                <strong>Method:</strong> {sections.irrigation_advice.method}
+                <strong>{t('method', language)}:</strong> {sections.irrigation_advice.method}
               </div>
               <div className="detail-item">
-                <strong>Water Requirement:</strong> {sections.irrigation_advice.water_requirement}
+                <strong>{t('water_requirement', language)}:</strong> {sections.irrigation_advice.water_requirement}
               </div>
             </div>
 
-            <h3>Irrigation Tips</h3>
+            <h3>{t('irrigation_tips', language)}</h3>
             <ul className="tips-list">
               {sections.irrigation_advice.tips.map((tip, idx) => (
                 <li key={idx}>{tip}</li>
@@ -231,7 +231,7 @@ function AdvisoryReport({ report, onBack, language = 'en' }) {
           <div className="section-content">
             <p className="explanation">{sections.risk_assessment.explanation}</p>
             
-            <h3>Identified Risks</h3>
+            <h3>{t('identified_risks', language)}</h3>
             <div className="risks-list">
               {sections.risk_assessment.risks.map((risk, idx) => (
                 <div key={idx} className={`risk-card severity-${risk.severity.toLowerCase()}`}>
@@ -244,7 +244,7 @@ function AdvisoryReport({ report, onBack, language = 'en' }) {
               ))}
             </div>
 
-            <h3>Mitigation Strategies</h3>
+            <h3>{t('mitigation_strategies', language)}</h3>
             <ul className="mitigation-list">
               {sections.risk_assessment.mitigation.map((strategy, idx) => (
                 <li key={idx}>{strategy}</li>
@@ -285,7 +285,7 @@ function AdvisoryReport({ report, onBack, language = 'en' }) {
           <div className="section-content">
             <h2>{t('vegetation_status', language)}</h2>
             <div className="vegetation-info">
-              <span>NDVI: {sections.vegetation_status.ndvi}</span>
+              <span>{t('ndvi', language)}: {sections.vegetation_status.ndvi}</span>
               <span className={`health-badge health-${sections.vegetation_status.health}`}>
                 {sections.vegetation_status.health}
               </span>

@@ -61,6 +61,25 @@ export const translations = {
     'medium': 'Medium',
     'high': 'High',
     
+    // Advisory Report Labels
+    'soil_type_label': 'Soil Type',
+    'texture': 'Texture',
+    'fertility': 'Fertility',
+    'ph_status': 'pH Status',
+    'organic_matter': 'Organic Matter',
+    'npk_ratio': 'NPK Ratio',
+    'application_schedule': 'Application Schedule',
+    'organic_alternatives': 'Organic Alternatives',
+    'specific_recommendations': 'Specific Recommendations',
+    'identified_risks': 'Identified Risks',
+    'mitigation_strategies': 'Mitigation Strategies',
+    'irrigation_tips': 'Irrigation Tips',
+    'timing': 'Timing',
+    'frequency': 'Frequency',
+    'method': 'Method',
+    'water_requirement': 'Water Requirement',
+    'ndvi': 'NDVI',
+    
     // Market & Weather
     'market_weather': 'Market & Weather',
     'weather_analytics': 'Weather Analytics',
@@ -141,7 +160,26 @@ export const translations = {
     // Common
     'low': 'कम',
     'medium': 'मध्यम',
-    'high': 'उच्च'
+    'high': 'उच्च',
+    
+    // Advisory Report Labels
+    'soil_type_label': 'मिट्टी का प्रकार',
+    'texture': 'बनावट',
+    'fertility': 'उर्वरता',
+    'ph_status': 'पीएच स्थिति',
+    'organic_matter': 'जैविक पदार्थ',
+    'npk_ratio': 'एनपीके अनुपात',
+    'application_schedule': 'आवेदन अनुसूची',
+    'organic_alternatives': 'जैविक विकल्प',
+    'specific_recommendations': 'विशिष्ट सिफारिशें',
+    'identified_risks': 'पहचाने गए जोखिम',
+    'mitigation_strategies': 'शमन रणनीतियाँ',
+    'irrigation_tips': 'सिंचाई सुझाव',
+    'timing': 'समय',
+    'frequency': 'आवृत्ति',
+    'method': 'विधि',
+    'water_requirement': 'पानी की आवश्यकता',
+    'ndvi': 'एनडीवीआई',
   },
   
   kn: {
@@ -199,7 +237,26 @@ export const translations = {
     // Common
     'low': 'ಕಡಿಮೆ',
     'medium': 'ಮಧ್ಯಮ',
-    'high': 'ಹೆಚ್ಚು'
+    'high': 'ಹೆಚ್ಚು',
+    
+    // Advisory Report Labels
+    'soil_type_label': 'ಮಣ್ಣಿನ ಪ್ರಕಾರ',
+    'texture': 'ವಿನ್ಯಾಸ',
+    'fertility': 'ಫಲವತ್ತತೆ',
+    'ph_status': 'ಪಿಎಚ್ ಸ್ಥಿತಿ',
+    'organic_matter': 'ಸಾವಯವ ಪದಾರ್ಥ',
+    'npk_ratio': 'ಎನ್‌ಪಿಕೆ ಅನುಪಾತ',
+    'application_schedule': 'ಅನ್ವಯ ವೇಳಾಪಟ್ಟಿ',
+    'organic_alternatives': 'ಸಾವಯವ ಪರ್ಯಾಯಗಳು',
+    'specific_recommendations': 'ನಿರ್ದಿಷ್ಟ ಶಿಫಾರಸುಗಳು',
+    'identified_risks': 'ಗುರುತಿಸಲಾದ ಅಪಾಯಗಳು',
+    'mitigation_strategies': 'ತಗ್ಗಿಸುವ ತಂತ್ರಗಳು',
+    'irrigation_tips': 'ನೀರಾವರಿ ಸಲಹೆಗಳು',
+    'timing': 'ಸಮಯ',
+    'frequency': 'ಆವರ್ತನ',
+    'method': 'ವಿಧಾನ',
+    'water_requirement': 'ನೀರಿನ ಅವಶ್ಯಕತೆ',
+    'ndvi': 'ಎನ್‌ಡಿವಿಐ',
   },
   
   ta: {
@@ -257,7 +314,26 @@ export const translations = {
     // Common
     'low': 'குறைவு',
     'medium': 'நடுத்தரம்',
-    'high': 'அதிகம்'
+    'high': 'அதிகம்',
+    
+    // Advisory Report Labels
+    'soil_type_label': 'மண் வகை',
+    'texture': 'அமைப்பு',
+    'fertility': 'வளம்',
+    'ph_status': 'பிஎச் நிலை',
+    'organic_matter': 'கரிமப் பொருள்',
+    'npk_ratio': 'என்பிகே விகிதம்',
+    'application_schedule': 'பயன்பாட்டு அட்டவணை',
+    'organic_alternatives': 'கரிம மாற்றுகள்',
+    'specific_recommendations': 'குறிப்பிட்ட பரிந்துரைகள்',
+    'identified_risks': 'அடையாளம் காணப்பட்ட அபாயங்கள்',
+    'mitigation_strategies': 'தணிப்பு உத்திகள்',
+    'irrigation_tips': 'நீர்ப்பாசன குறிப்புகள்',
+    'timing': 'நேரம்',
+    'frequency': 'அதிர்வெண்',
+    'method': 'முறை',
+    'water_requirement': 'நீர் தேவை',
+    'ndvi': 'என்டிவிஐ',
   },
   
   te: {
@@ -315,7 +391,26 @@ export const translations = {
     // Common
     'low': 'తక్కువ',
     'medium': 'మధ్యస్థం',
-    'high': 'ఎక్కువ'
+    'high': 'ఎక్కువ',
+    
+    // Advisory Report Labels
+    'soil_type_label': 'నేల రకం',
+    'texture': 'ఆకృతి',
+    'fertility': 'సారవంతత',
+    'ph_status': 'పిహెచ్ స్థితి',
+    'organic_matter': 'సేంద్రీయ పదార్థం',
+    'npk_ratio': 'ఎన్‌పికె నిష్పత్తి',
+    'application_schedule': 'అప్లికేషన్ షెడ్యూల్',
+    'organic_alternatives': 'సేంద్రీయ ప్రత్యామ్నాయాలు',
+    'specific_recommendations': 'నిర్దిష్ట సిఫార్సులు',
+    'identified_risks': 'గుర్తించబడిన ప్రమాదాలు',
+    'mitigation_strategies': 'తగ్గింపు వ్యూహాలు',
+    'irrigation_tips': 'నీటిపారుదల చిట్కాలు',
+    'timing': 'సమయం',
+    'frequency': 'ఫ్రీక్వెన్సీ',
+    'method': 'పద్ధతి',
+    'water_requirement': 'నీటి అవసరం',
+    'ndvi': 'ఎన్‌డివిఐ',
   },
   
   mr: {
@@ -373,7 +468,26 @@ export const translations = {
     // Common
     'low': 'कमी',
     'medium': 'मध्यम',
-    'high': 'जास्त'
+    'high': 'जास्त',
+    
+    // Advisory Report Labels
+    'soil_type_label': 'माती प्रकार',
+    'texture': 'पोत',
+    'fertility': 'सुपीकता',
+    'ph_status': 'पीएच स्थिती',
+    'organic_matter': 'सेंद्रिय पदार्थ',
+    'npk_ratio': 'एनपीके गुणोत्तर',
+    'application_schedule': 'अर्ज वेळापत्रक',
+    'organic_alternatives': 'सेंद्रिय पर्याय',
+    'specific_recommendations': 'विशिष्ट शिफारसी',
+    'identified_risks': 'ओळखले गेलेले धोके',
+    'mitigation_strategies': 'कमी करण्याच्या धोरणे',
+    'irrigation_tips': 'सिंचन टिपा',
+    'timing': 'वेळ',
+    'frequency': 'वारंवारता',
+    'method': 'पद्धत',
+    'water_requirement': 'पाण्याची आवश्यकता',
+    'ndvi': 'एनडीव्हीआय',
   },
   
   bn: {

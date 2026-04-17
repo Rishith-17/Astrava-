@@ -44,7 +44,7 @@ function WeatherAnalytics({ language }) {
 
       // Fetch weather analytics
       const response = await fetch(
-        `http://localhost:3001/api/weather/analytics?latitude=${latitude}&longitude=${longitude}`
+        `/api/weather/analytics?latitude=${latitude}&longitude=${longitude}`
       );
 
       if (!response.ok) {

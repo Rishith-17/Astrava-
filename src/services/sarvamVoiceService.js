@@ -8,6 +8,7 @@ class SarvamVoiceService {
     this.audioChunks = [];
     this.isRecording = false;
     this.stream = null;
+    this.currentAudio = null; // track active playback for stop support
   }
 
   // Start recording audio
@@ -59,7 +60,8 @@ class SarvamVoiceService {
   async stopRecording() {
     return new Promise((resolve, reject) => {
       if (!this.mediaRecorder || !this.isRecording) {
-        reject(new Error('No active recording'));
+        // Return empty blob gracefully instead of throwing
+        resolve(new Blob([], { type: 'audio/webm' }));
         return;
       }
 
@@ -88,72 +90,32 @@ class SarvamVoiceService {
     });
   }
 
-  // Convert audio to text using Sarvam AI
+  // Convert audio to text — routes through backend to handle format conversion
   async speechToText(audioBlob, language = 'hi-IN') {
     try {
-      if (!SARVAM_API_KEY) {
-        throw new Error('Sarvam API key not configured');
-      }
-
       console.log('Converting speech to text. Language:', language, 'Blob size:', audioBlob.size, 'Type:', audioBlob.type);
-      
-      // Clean up MIME type - remove codec specification
-      let mimeType = audioBlob.type;
-      if (mimeType.includes(';')) {
-        mimeType = mimeType.split(';')[0];
-      }
-      
-      console.log('Cleaned MIME type:', mimeType);
-      
-      // Create a new blob with clean MIME type (without codecs)
-      const cleanBlob = new Blob([audioBlob], { type: mimeType });
-      
+
+      const mimeType = audioBlob.type.split(';')[0]; // strip codec params
+      const ext = mimeType.includes('wav') ? 'wav' : mimeType.includes('mp3') ? 'mp3' : 'webm';
+
       const formData = new FormData();
-      
-      // Create a file from blob with appropriate extension
-      const extension = mimeType.includes('wav') ? 'wav' : 'webm';
-      const audioFile = new File([cleanBlob], `audio.${extension}`, { 
-        type: mimeType
-      });
-      
-      formData.append('file', audioFile);
+      formData.append('file', new File([audioBlob], `audio.${ext}`, { type: mimeType }));
       formData.append('language_code', language);
-      formData.append('model', 'saaras:v3');
 
-      console.log('Sending request to Sarvam AI...', {
-        fileName: audioFile.name,
-        fileSize: audioFile.size,
-        fileType: audioFile.type
-      });
-
-      const response = await fetch(`${SARVAM_API_BASE}/speech-to-text`, {
+      const response = await fetch('/api/stt', {
         method: 'POST',
-        headers: {
-          'API-Subscription-Key': SARVAM_API_KEY
-        },
         body: formData
       });
 
-      console.log('Sarvam API response status:', response.status);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Sarvam API error response:', errorText);
-        
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { message: errorText };
-        }
-        
-        throw new Error(`Sarvam API error (${response.status}): ${errorData.error?.message || errorData.message || errorText}`);
+        const err = await response.json().catch(() => ({}));
+        throw new Error(`STT error (${response.status}): ${err.details || err.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      console.log('Sarvam API response:', data);
-      
+      console.log('STT response:', data);
       return data.transcript || '';
+
     } catch (error) {
       console.error('Speech to text error:', error);
       throw new Error(error.message || 'Failed to convert speech to text');
@@ -222,19 +184,42 @@ class SarvamVoiceService {
     }
   }
 
-  // Play audio blob
+  // Play audio blob — stores reference so it can be stopped mid-playback
   playAudio(audioBlob) {
+    // Stop any currently playing audio first
+    this.stopAudio();
+
     const audioUrl = URL.createObjectURL(audioBlob);
     const audio = new Audio(audioUrl);
-    
+    this.currentAudio = audio;
+
     return new Promise((resolve, reject) => {
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
+        this.currentAudio = null;
         resolve();
       };
-      audio.onerror = reject;
-      audio.play();
+      audio.onerror = (e) => {
+        URL.revokeObjectURL(audioUrl);
+        this.currentAudio = null;
+        reject(e);
+      };
+      audio.play().catch(reject);
     });
+  }
+
+  // Stop any currently playing audio immediately
+  stopAudio() {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+      this.currentAudio = null;
+    }
+  }
+
+  // Check if audio is currently playing
+  isPlaying() {
+    return this.currentAudio !== null && !this.currentAudio.paused;
   }
 
   // Helper: Convert base64 to blob

@@ -18,16 +18,19 @@ import { AgriculturalAdvisorService } from './services/AgriculturalAdvisorServic
 import translationService from './services/TranslationService.js';
 import sarvamTTSService from './services/SarvamTTSService.js';
 import marketPriceService from './services/MarketPriceService.js';
+import sttRouter from './routes/stt.js';
 
-// Load environment variables from parent directory
-dotenv.config({ path: '.env' });
+// Load environment variables - server/.env first, then root .env as fallback
+dotenv.config({ path: new URL('.env', import.meta.url).pathname });
+dotenv.config({ path: new URL('../.env', import.meta.url).pathname });
 
 const app = express();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const advisorService = new AgriculturalAdvisorService();
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/stt', sttRouter);
 
 app.post('/api/analyze', upload.single('image'), async (req, res) => {
   try {
@@ -38,9 +41,9 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'No image provided' });
     }
 
-    // Validate image size (5MB max)
-    if (imageBuffer.length > 5 * 1024 * 1024) {
-      return res.status(400).json({ error: 'Image size exceeds 5MB limit' });
+    // Validate image size (10MB max)
+    if (imageBuffer.length > 10 * 1024 * 1024) {
+      return res.status(400).json({ error: 'Image size exceeds 10MB limit' });
     }
 
     const lat = parseFloat(latitude);
@@ -455,9 +458,9 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'No text provided' });
     }
 
-    // Validate text length (max 500 characters per request)
-    if (text.length > 500) {
-      return res.status(400).json({ error: 'Text exceeds 500 character limit. Please split into chunks.' });
+    // Validate text length (max 1000 characters per request)
+    if (text.length > 1000) {
+      return res.status(400).json({ error: 'Text exceeds 1000 character limit. Please split into chunks.' });
     }
 
     console.log(`Converting text to speech: ${text.substring(0, 50)}... (${text.length} chars, language: ${language})`);
