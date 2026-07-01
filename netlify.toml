@@ -4,13 +4,13 @@
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "esbuild"
-  included_files = ["server/**"]
+  # zisi bundler preserves ESM imports and import.meta correctly
+  node_bundler = "zisi"
 
 [functions."api"]
   timeout = 26
 
-# Proxy /api/* to the serverless function
+# Proxy /api/* to the Netlify Function
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/api/:splat"

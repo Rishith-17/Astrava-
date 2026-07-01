@@ -27,26 +27,27 @@ const logger = winston.createLogger({
     logFormat
   ),
   transports: [
-    // Console transport
+    // Console only — file transport not available in serverless environments
     new winston.transports.Console({
       format: combine(
         colorize(),
         logFormat
       )
     }),
-    // File transport for errors
-    new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    }),
-    // File transport for all logs
-    new winston.transports.File({
-      filename: 'logs/combined.log',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    })
+    // File transports only when running locally (not in serverless)
+    ...(process.env.NODE_ENV !== 'production' ? [
+      new winston.transports.File({
+        filename: 'logs/error.log',
+        level: 'error',
+        maxsize: 5242880,
+        maxFiles: 5
+      }),
+      new winston.transports.File({
+        filename: 'logs/combined.log',
+        maxsize: 5242880,
+        maxFiles: 5
+      })
+    ] : [])
   ]
 });
 
