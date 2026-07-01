@@ -1,14 +1,13 @@
 [build]
-  command = "npm install --prefix server && npm run build"
+  command = "node build-function.mjs && npm install --prefix server && npm run build"
   publish = "dist"
 
 [functions]
-  directory = "server/netlify-functions"
+  directory = "netlify-dist-functions"
   node_bundler = "nft"
 
 [functions."api"]
   timeout = 26
-  included_files = ["server/node_modules/**"]
 
 # Proxy /api/* to the Netlify Function
 [[redirects]]

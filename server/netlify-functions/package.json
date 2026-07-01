@@ -1,3 +1,6 @@
 {
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "serverless-http": "^4.0.0"
+  }
 }
