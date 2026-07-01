@@ -328,7 +328,7 @@ function LandingPage({ onEnterApp }) {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2025 Astrava. Built with ❤️ for Indian Farmers. Powered by AWS.</p>
+            <p>&copy; 2025 Astrava · <a href="https://bhumimind.in" style={{color:'#10b981'}}>bhumimind.in</a> · Built with ❤️ for Indian Farmers.</p>
           </div>
         </div>
       </footer>
