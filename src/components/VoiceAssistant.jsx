@@ -1,41 +1,30 @@
 import { useState } from 'react';
 import VoiceController from './VoiceController';
-import WakeWordDetector from './WakeWordDetector';
 import './VoiceAssistant.css';
 
+/**
+ * VoiceAssistant — manual mic button only.
+ * Wake word detection (Porcupine) removed: requires paid API key
+ * and browser WASM loading which is unreliable on mobile/PWA.
+ * The manual mic button provides all the same functionality.
+ */
 function VoiceAssistant({ onLanguageDetected, onCommand, currentLanguage, onPhotoCapture }) {
   const [showController, setShowController] = useState(false);
-  
-  // Get Porcupine access key from environment
-  const porcupineAccessKey = import.meta.env.VITE_PORCUPINE_ACCESS_KEY;
-
-  const handleWakeWordDetected = (keywordIndex) => {
-    console.log('Wake word detected, opening voice controller');
-    setShowController(true);
-  };
 
   return (
     <>
       <div className="voice-assistant">
-        {/* Wake Word Detector */}
-        {porcupineAccessKey && (
-          <WakeWordDetector
-            accessKey={porcupineAccessKey}
-            onWakeWordDetected={handleWakeWordDetected}
-          />
-        )}
-
-        {/* Manual Voice Button */}
         <button
           className="voice-btn"
           onClick={() => setShowController(true)}
-          aria-label="Voice Assistant"
+          aria-label="Voice Assistant — tap to speak"
+          title="Tap to use voice commands"
         >
           {/* Animated orbital rings */}
           <span className="voice-btn-ring ring-1"></span>
           <span className="voice-btn-ring ring-2"></span>
           <span className="voice-btn-ring ring-3"></span>
-          {/* SVG Mic Icon */}
+          {/* Mic icon */}
           <svg className="voice-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>

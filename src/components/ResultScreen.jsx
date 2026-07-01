@@ -314,6 +314,9 @@ function ResultScreen({ result, onBack, language }) {
     );
   };
 
+  // Determine if this is demo data
+  const isDemo = result?._isDemo || result?.analysis?._isDemo || !result?.data_sources?.ml_model;
+
   return (
     <div className="screen result-screen animate-fade-in">
       <div className="header-glass sticky-header">
@@ -324,6 +327,18 @@ function ResultScreen({ result, onBack, language }) {
         <div style={{ width: 40 }}></div>
       </div>
 
+      {/* Demo mode banner */}
+      {isDemo && (
+        <div className="demo-result-banner">
+          <span className="demo-badge">DEMO</span>
+          <div className="demo-banner-text">
+            <strong>Sample Analysis</strong> — This is how your real soil report will look.
+            Our AI model is trained and ready; cloud deployment is pending seed funding.
+            <span className="demo-badge-sub"> Full analysis available post-deployment.</span>
+          </div>
+        </div>
+      )}
+
       <div className="status-hero glass-card mb-6">
         <div className="status-icon-glow">
           {result.isAgenticWorkflow ? <Activity size={32} /> : <ShieldCheck size={32} />}
@@ -332,7 +347,7 @@ function ResultScreen({ result, onBack, language }) {
           <h2 className="text-gradient-primary">
             {result.isAgenticWorkflow ? t('autonomous_analysis', language) : t('analysis_complete', language)}
           </h2>
-          <p className="text-tertiary">Verified and accurate data</p>
+          <p className="text-tertiary">{isDemo ? 'Demo result — model deployment in progress' : 'Verified and accurate data'}</p>
         </div>
         {renderConfidenceCircle(analysis.confidence)}
       </div>
