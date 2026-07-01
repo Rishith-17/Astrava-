@@ -4,7 +4,7 @@
 
 [functions]
   directory = "server/netlify-functions"
-  node_bundler = "zisi"
+  node_bundler = "nft"
 
 [functions."api"]
   timeout = 26
