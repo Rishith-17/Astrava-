@@ -21,8 +21,10 @@ import marketPriceService from './services/MarketPriceService.js';
 import sttRouter from './routes/stt.js';
 
 // Load environment variables - server/.env first, then root .env as fallback
-dotenv.config({ path: new URL('.env', import.meta.url).pathname });
-dotenv.config({ path: new URL('../.env', import.meta.url).pathname });
+try {
+  dotenv.config({ path: new URL('.env', import.meta.url).pathname });
+  dotenv.config({ path: new URL('../.env', import.meta.url).pathname });
+} catch (_) { /* production — env vars already set */ }
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });

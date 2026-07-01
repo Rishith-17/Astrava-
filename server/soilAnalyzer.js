@@ -4,9 +4,12 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: join(__dirname, '.env') });
-dotenv.config({ path: join(__dirname, '../.env') });
+// Safe dotenv loading — no-ops in production where env vars come from the platform
+try {
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  dotenv.config({ path: join(__dirname, '.env') });
+  dotenv.config({ path: join(__dirname, '../.env') });
+} catch (_) { /* bundled/production environment — env vars already set */ }
 
 /**
  * Analyze soil image using ML model via ngrok endpoint

@@ -1,23 +1,27 @@
 /**
  * Netlify Function — wraps the entire Express server
- * All /api/* requests from the frontend are proxied here
+ * All /api/* requests from the frontend are proxied here via the redirect in netlify.toml
+ *
+ * NOTE: In this environment, process.env variables come from Netlify dashboard.
+ * The dotenv calls in server/* gracefully no-op when .env files are absent.
  */
+
 import serverless from 'serverless-http';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// ── Polyfill import.meta.url for esbuild CJS output ──
+// Server files use dirname(fileURLToPath(import.meta.url)) only to load .env files.
+// In production these dotenv calls are harmless no-ops (env vars come from Netlify).
+// We don't need to polyfill — server files catch errors on their own.
 
-// Load env vars
-dotenv.config({ path: join(__dirname, '../../server/.env') });
-dotenv.config({ path: join(__dirname, '../../.env') });
-
-// Import all server modules (same as server/index.js but without app.listen)
-import { analyzeSoilImage, getSoilData, generateAdvice } from '../../server/soilAnalyzer.js';
+import { AgriculturalAdvisorService } from '../../server/services/AgriculturalAdvisorService.js';
+import translationService from '../../server/services/TranslationService.js';
+import sarvamTTSService from '../../server/services/SarvamTTSService.js';
+import marketPriceService from '../../server/services/MarketPriceService.js';
+import sttRouter from '../../server/routes/stt.js';
+import { analyzeSoilImage, generateAdvice } from '../../server/soilAnalyzer.js';
 import {
   geocoderService,
   soilGridsService,
@@ -29,11 +33,6 @@ import {
   soilHealthCardService,
   faoStatService
 } from '../../server/services/index.js';
-import { AgriculturalAdvisorService } from '../../server/services/AgriculturalAdvisorService.js';
-import translationService from '../../server/services/TranslationService.js';
-import sarvamTTSService from '../../server/services/SarvamTTSService.js';
-import marketPriceService from '../../server/services/MarketPriceService.js';
-import sttRouter from '../../server/routes/stt.js';
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -42,23 +41,21 @@ const advisorService = new AgriculturalAdvisorService();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// ── Health check ──
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), env: process.env.NODE_ENV });
 });
 
-// Mount STT router
+// ── STT ──
 app.use('/api/stt', sttRouter);
 
-// ── Copy all routes from server/index.js below ──
-// (All routes are identical; just no app.listen at the end)
-
+// ── Analyze ──
 app.post('/api/analyze', upload.single('image'), async (req, res) => {
   try {
     const { latitude, longitude, language } = req.body;
     const imageBuffer = req.file?.buffer;
     if (!imageBuffer) return res.status(400).json({ error: 'No image provided' });
-    if (imageBuffer.length > 10 * 1024 * 1024) return res.status(400).json({ error: 'Image size exceeds 10MB limit' });
+    if (imageBuffer.length > 10 * 1024 * 1024) return res.status(400).json({ error: 'Image too large' });
 
     const lat = parseFloat(latitude);
     const lon = parseFloat(longitude);
@@ -79,28 +76,26 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
     ]);
 
     const locationData = locationResult.success ? locationResult.data : null;
-    const soilProps = soilPropsResult.success ? soilPropsResult.data : null;
-    const weatherData = weatherResult.success ? weatherResult.data : null;
+    const soilProps    = soilPropsResult.success ? soilPropsResult.data : null;
+    const weatherData  = weatherResult.success ? weatherResult.data : null;
     const satelliteData = satelliteResult.success ? satelliteResult.data : null;
     const soilHealthData = soilHealthResult.success ? soilHealthResult.data : null;
     const bhuvanMoisture = bhuvanMoistureResult.success ? bhuvanMoistureResult.data : null;
     const faoRecommendations = faoRecommendationsResult.success ? faoRecommendationsResult.data : null;
 
-    let effectiveSoilProps = soilProps || getEstimatedSoilProperties(mlResult.soil_type);
+    const effectiveSoilProps = soilProps || getEstimatedSoilProperties(mlResult.soil_type);
 
     let cropHealthData = null;
     if (satelliteData?.ndvi) {
-      const cropHealthResult = await cropHealthService.getCropHealth(lat, lon, satelliteData.ndvi);
-      if (cropHealthResult.success) cropHealthData = cropHealthResult.data;
+      const r = await cropHealthService.getCropHealth(lat, lon, satelliteData.ndvi);
+      if (r.success) cropHealthData = r.data;
     }
 
     const nutrientStatus = classifyNutrients(effectiveSoilProps);
 
     let fertilizerData = null;
-    if (effectiveSoilProps && nutrientStatus) {
-      const fertResult = await fertilizerService.getFertilizerRecommendation(mlResult.soil_type, nutrientStatus, 'general');
-      if (fertResult.success) fertilizerData = fertResult.data;
-    }
+    const fertResult = await fertilizerService.getFertilizerRecommendation(mlResult.soil_type, nutrientStatus, 'general');
+    if (fertResult.success) fertilizerData = fertResult.data;
 
     let analysis = {
       soil_type: mlResult.soil_type,
@@ -138,11 +133,8 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
       }
     };
 
-    const advice = await generateAdvice(analysis, language);
-    analysis.advice = advice;
-
-    const advisoryReport = advisorService.generateReport(analysis, language);
-    analysis.advisory_report = advisoryReport;
+    analysis.advice = await generateAdvice(analysis, language);
+    analysis.advisory_report = advisorService.generateReport(analysis, language);
 
     if (language && language !== 'en') {
       analysis = await translationService.translateAnalysisResults(analysis, language);
@@ -151,10 +143,11 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
     res.json(analysis);
   } catch (error) {
     console.error('Analysis error:', error);
-    res.status(500).json({ error: error.message, details: 'Failed to analyze soil image.' });
+    res.status(500).json({ error: error.message });
   }
 });
 
+// ── Translate ──
 app.post('/api/translate', async (req, res) => {
   try {
     const { text, targetLanguage } = req.body;
@@ -167,11 +160,12 @@ app.post('/api/translate', async (req, res) => {
   }
 });
 
+// ── TTS ──
 app.post('/api/tts', async (req, res) => {
   try {
     const { text, language = 'en' } = req.body;
     if (!text) return res.status(400).json({ error: 'No text provided' });
-    if (text.length > 1000) return res.status(400).json({ error: 'Text exceeds 1000 character limit.' });
+    if (text.length > 1000) return res.status(400).json({ error: 'Text too long' });
     const languageCode = sarvamTTSService.getLanguageCode(language);
     const speaker = sarvamTTSService.getSpeaker(language);
     const audioBuffer = await sarvamTTSService.textToSpeech(text, languageCode, speaker);
@@ -182,12 +176,12 @@ app.post('/api/tts', async (req, res) => {
   }
 });
 
+// ── Market ──
 app.get('/api/market/search', (req, res) => {
   try {
-    const crops = marketPriceService.searchCrops(req.query.query);
-    res.json({ crops });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to search crops' });
+    res.json({ crops: marketPriceService.searchCrops(req.query.query) });
+  } catch (e) {
+    res.status(500).json({ error: 'Search failed' });
   }
 });
 
@@ -196,21 +190,23 @@ app.get('/api/market/price/:cropName', async (req, res) => {
     const result = await marketPriceService.getCropPrice(req.params.cropName, req.query.state);
     if (result.success) res.json(result.data);
     else res.status(500).json({ error: result.error });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch market price' });
+  } catch (e) {
+    res.status(500).json({ error: 'Price fetch failed' });
   }
 });
 
+// ── Weather Analytics ──
 app.get('/api/weather/analytics', async (req, res) => {
   try {
     const { latitude, longitude } = req.query;
-    if (!latitude || !longitude) return res.status(400).json({ error: 'Latitude and longitude required' });
-    const weatherResult = await weatherService.getWeatherData(parseFloat(latitude), parseFloat(longitude));
-    if (!weatherResult.success) return res.status(500).json({ error: 'Failed to fetch weather data' });
+    if (!latitude || !longitude) return res.status(400).json({ error: 'lat/lon required' });
+    const lat = parseFloat(latitude), lon = parseFloat(longitude);
+    const weatherResult = await weatherService.getWeatherData(lat, lon);
+    if (!weatherResult.success) return res.status(500).json({ error: 'Weather fetch failed' });
     const forecast = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(); date.setDate(date.getDate() + i);
+      const d = new Date(); d.setDate(d.getDate() + i);
       return {
-        date: date.toISOString().split('T')[0],
+        date: d.toISOString().split('T')[0],
         temperature: weatherResult.data.temperature + (Math.random() * 6 - 3),
         humidity: weatherResult.data.humidity + (Math.random() * 10 - 5),
         rainfall: Math.random() * 20,
@@ -218,67 +214,62 @@ app.get('/api/weather/analytics', async (req, res) => {
         pressure: 1013 + (Math.random() * 10 - 5)
       };
     });
-    res.json({ current: weatherResult.data, forecast, location: { latitude: parseFloat(latitude), longitude: parseFloat(longitude) } });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch weather analytics' });
+    res.json({ current: weatherResult.data, forecast, location: { latitude: lat, longitude: lon } });
+  } catch (e) {
+    res.status(500).json({ error: 'Weather analytics failed' });
   }
 });
 
-// ── Helper functions (same as server/index.js) ──
+// ── Helpers ──
 function getEstimatedSoilProperties(soilType) {
-  const t = soilType.toLowerCase();
-  if (t.includes('black')) return { soil_ph: 7.2, organic_carbon: 0.5, soil_clay_percentage: 50, soil_sand_percentage: 25, nitrogen_content: 0.05, cec: 35 };
-  if (t.includes('red')) return { soil_ph: 6.5, organic_carbon: 0.4, soil_clay_percentage: 30, soil_sand_percentage: 50, nitrogen_content: 0.04, cec: 15 };
+  const t = (soilType || '').toLowerCase();
+  if (t.includes('black'))    return { soil_ph: 7.2, organic_carbon: 0.5, soil_clay_percentage: 50, soil_sand_percentage: 25, nitrogen_content: 0.05, cec: 35 };
+  if (t.includes('red'))      return { soil_ph: 6.5, organic_carbon: 0.4, soil_clay_percentage: 30, soil_sand_percentage: 50, nitrogen_content: 0.04, cec: 15 };
   if (t.includes('alluvial')) return { soil_ph: 7.0, organic_carbon: 0.8, soil_clay_percentage: 35, soil_sand_percentage: 40, nitrogen_content: 0.08, cec: 25 };
   if (t.includes('laterite')) return { soil_ph: 5.5, organic_carbon: 0.3, soil_clay_percentage: 40, soil_sand_percentage: 35, nitrogen_content: 0.03, cec: 10 };
   return { soil_ph: 6.5, organic_carbon: 0.5, soil_clay_percentage: 35, soil_sand_percentage: 40, nitrogen_content: 0.05, cec: 20 };
 }
 
-function classifyNutrients(soilProps) {
-  if (!soilProps) return { nitrogen: 'Unknown', phosphorus: 'Unknown', potassium: 'Unknown', deficiencies: [] };
+function classifyNutrients(sp) {
+  if (!sp) return { nitrogen: 'Unknown', phosphorus: 'Unknown', potassium: 'Unknown', deficiencies: [] };
   const deficiencies = [];
   let nitrogen = 'Medium';
-  if (soilProps.organic_carbon < 1.0) { nitrogen = 'Low'; deficiencies.push('nitrogen'); }
-  else if (soilProps.organic_carbon > 2.0) nitrogen = 'High';
-  return { nitrogen, phosphorus: 'Medium', potassium: 'Medium', deficiencies, organic_carbon: soilProps.organic_carbon };
+  if (sp.organic_carbon < 1.0) { nitrogen = 'Low'; deficiencies.push('nitrogen'); }
+  else if (sp.organic_carbon > 2.0) nitrogen = 'High';
+  return { nitrogen, phosphorus: 'Medium', potassium: 'Medium', deficiencies, organic_carbon: sp.organic_carbon };
 }
 
-function formatFertilizerRecommendation(fertData) {
-  const total = fertData.nitrogen_kg_per_acre + fertData.phosphorus_kg_per_acre + fertData.potassium_kg_per_acre;
-  let r = `Apply ${fertData.npk_ratio} fertilizer at ${total} kg per acre`;
-  if (fertData.organic_amendments?.length > 0) r += `. Organic options: ${fertData.organic_amendments.slice(0, 2).join(', ')}`;
+function formatFertilizerRecommendation(f) {
+  const total = (f.nitrogen_kg_per_acre || 0) + (f.phosphorus_kg_per_acre || 0) + (f.potassium_kg_per_acre || 0);
+  let r = `Apply ${f.npk_ratio} fertilizer at ${total} kg per acre`;
+  if (f.organic_amendments?.length > 0) r += `. Organic: ${f.organic_amendments.slice(0, 2).join(', ')}`;
   return r;
 }
 
-function determineDeficiency(soilData, mlNutrientStatus = {}) {
-  const { ph, organic_carbon } = soilData || {};
+function determineDeficiency(sp, ns = {}) {
   const d = [];
-  if (ph && ph < 5.5) d.push('Acidic soil - may need lime application');
-  else if (ph && ph > 8.0) d.push('Alkaline soil - may need sulfur application');
-  if (organic_carbon && organic_carbon < 1.0) d.push('Low organic matter - add compost');
-  if (mlNutrientStatus.nitrogen === 'Low') d.push('Low nitrogen - needs nitrogen-rich fertilizer');
-  if (mlNutrientStatus.phosphorus === 'Low') d.push('Low phosphorus - needs phosphate fertilizer');
-  if (mlNutrientStatus.potassium === 'Low') d.push('Low potassium - needs potash fertilizer');
-  return d.length > 0 ? d.join('. ') : 'Nutrient levels are adequate';
+  if (sp?.ph < 5.5) d.push('Acidic - needs lime'); else if (sp?.ph > 8.0) d.push('Alkaline - needs sulfur');
+  if (sp?.organic_carbon < 1.0) d.push('Low organic matter - add compost');
+  if (ns.nitrogen === 'Low') d.push('Low nitrogen');
+  if (ns.phosphorus === 'Low') d.push('Low phosphorus');
+  if (ns.potassium === 'Low') d.push('Low potassium');
+  return d.length > 0 ? d.join('. ') : 'Nutrient levels adequate';
 }
 
-function recommendCrops(soilType, soilData, weatherData) {
-  const t = soilType.toLowerCase();
+function recommendCrops(soilType, sp, weatherData) {
+  const t = (soilType || '').toLowerCase();
   let crops = [];
-  if (t.includes('black')) crops = ['Cotton', 'Wheat', 'Sorghum', 'Sunflower'];
+  if (t.includes('black'))    crops = ['Cotton', 'Wheat', 'Sorghum', 'Sunflower'];
   else if (t.includes('red')) crops = ['Groundnut', 'Millets', 'Pulses', 'Oilseeds'];
   else if (t.includes('alluvial')) crops = ['Rice', 'Wheat', 'Sugarcane', 'Vegetables'];
   else if (t.includes('laterite')) crops = ['Cashew', 'Coconut', 'Tea', 'Coffee'];
   else crops = ['Rice', 'Wheat', 'Maize', 'Vegetables'];
-  if (soilData) {
-    if (soilData.sand > 60) crops.push('Millets', 'Groundnut');
-    if (soilData.clay > 50) crops.push('Rice', 'Sugarcane');
-    if (soilData.ph < 6.0) crops.push('Tea', 'Potato');
-  }
+  if (sp?.sand > 60) crops.push('Millets', 'Groundnut');
+  if (sp?.clay > 50) crops.push('Rice', 'Sugarcane');
   return [...new Set(crops)].slice(0, 5);
 }
 
-// Export as serverless handler
+// Export as serverless handler — support binary audio responses
 export const handler = serverless(app, {
   binary: ['audio/wav', 'audio/mpeg', 'audio/ogg', 'image/*', 'application/octet-stream']
 });

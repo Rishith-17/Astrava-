@@ -9,7 +9,6 @@
 
 [functions."api"]
   timeout = 26
-  external_node_modules = ["form-data"]
 
 # Proxy /api/* to the serverless function
 [[redirects]]
