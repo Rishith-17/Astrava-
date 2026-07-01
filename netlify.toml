@@ -1,10 +1,11 @@
 [build]
-  command = "node build-function.mjs && npm install --prefix server && npm run build"
+  command = "node build-function.mjs && npm run build"
   publish = "dist"
 
 [functions]
   directory = "netlify-dist-functions"
-  node_bundler = "nft"
+  # esbuild sees a pre-bundled CJS file with no imports — passes through cleanly
+  node_bundler = "esbuild"
 
 [functions."api"]
   timeout = 26
