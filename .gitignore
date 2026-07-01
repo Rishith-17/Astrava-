@@ -2,9 +2,11 @@
 node_modules/
 server/node_modules/
 
-# Environment variables (tracked intentionally for deployment)
-# .env
-# server/.env
+# Environment variables — set these in Render dashboard, NOT in git
+.env
+.env.local
+.env.production
+server/.env
 
 # Build outputs
 dist/

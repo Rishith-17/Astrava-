@@ -10,6 +10,8 @@ import AdvisoryReport from './AdvisoryReport';
 import { t } from '../translations';
 import sarvamVoiceService from '../services/sarvamVoiceService';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 function ResultScreen({ result, onBack, language }) {
   const [speaking, setSpeaking] = useState(false);
   const [showReport, setShowReport] = useState(false);
@@ -262,7 +264,7 @@ function ResultScreen({ result, onBack, language }) {
 
       let finalText = textToSpeak;
       if (language !== 'en') {
-        const translateRes = await fetch('/api/translate', {
+        const translateRes = await fetch(`${API_BASE}/translate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: textToSpeak, targetLanguage: language })
@@ -276,7 +278,7 @@ function ResultScreen({ result, onBack, language }) {
 
       for (const chunk of chunks) {
         if (stopRequestedRef.current) break;
-        const ttsRes = await fetch('/api/tts', {
+        const ttsRes = await fetch(`${API_BASE}/tts`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: chunk, language })

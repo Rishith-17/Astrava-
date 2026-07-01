@@ -6,6 +6,9 @@
 import sarvamVoiceService from './sarvamVoiceService';
 import { analyzeSoil } from './soilService';
 
+// Same base URL used by soilService — full URL in production, relative in dev
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 class AutonomousAgentService {
   constructor() {
     this.isProcessing = false;
@@ -78,7 +81,7 @@ class AutonomousAgentService {
           const translatedChunks = [];
           
           for (const chunk of chunks) {
-            const translateRes = await fetch('/api/translate', {
+            const translateRes = await fetch(`${API_BASE}/translate`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ text: chunk, targetLanguage: language })
@@ -111,7 +114,7 @@ class AutonomousAgentService {
           this.updateStatus(4, `Converting to speech (${i + 1}/${chunks.length})...`);
           
           // Call backend TTS endpoint
-          const response = await fetch('/api/tts', {
+          const response = await fetch(`${API_BASE}/tts`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

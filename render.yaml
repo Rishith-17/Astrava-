@@ -1,0 +1,58 @@
+services:
+  # ─────────────────────────────────────────────
+  # Backend: Express API Server
+  # Deploy this FIRST — copy the URL it gives you
+  # then set VITE_API_URL in the frontend service
+  # ─────────────────────────────────────────────
+  - type: web
+    name: astrava-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: OPENCAGE_API_KEY
+        sync: false
+      - key: WEATHER_API_KEY
+        sync: false
+      - key: PLANET_API_KEY
+        sync: false
+      - key: CROP_HEALTH_API_KEY
+        sync: false
+      - key: GOV_INDIA_API_KEY
+        sync: false
+      - key: LANGBLY_API_KEY
+        sync: false
+      - key: SOIL_CLASSIFY_API_URL
+        sync: false
+      - key: PINECONE_API_KEY
+        sync: false
+
+  # ─────────────────────────────────────────────
+  # Frontend: React/Vite Static Site
+  # ─────────────────────────────────────────────
+  - type: web
+    name: astrava-frontend
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # After backend deploys, set this to:
+      # https://astrava-backend.onrender.com/api
+      - key: VITE_API_URL
+        sync: false
+      - key: VITE_SARVAM_API_KEY
+        sync: false
+      - key: VITE_PORCUPINE_ACCESS_KEY
+        sync: false

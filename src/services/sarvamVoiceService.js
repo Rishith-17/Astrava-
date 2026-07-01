@@ -1,6 +1,7 @@
 // Sarvam AI Voice Service for Indian Languages
 const SARVAM_API_KEY = import.meta.env.VITE_SARVAM_API_KEY;
 const SARVAM_API_BASE = 'https://api.sarvam.ai';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 class SarvamVoiceService {
   constructor() {
@@ -102,7 +103,7 @@ class SarvamVoiceService {
       formData.append('file', new File([audioBlob], `audio.${ext}`, { type: mimeType }));
       formData.append('language_code', language);
 
-      const response = await fetch('/api/stt', {
+      const response = await fetch(`${API_BASE}/stt`, {
         method: 'POST',
         body: formData
       });

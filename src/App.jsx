@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import LandingPage from './components/LandingPage';
 import HomeScreen from './components/HomeScreen';
 import UploadScreen from './components/UploadScreen';
 import ResultScreen from './components/ResultScreen';
@@ -13,6 +14,10 @@ import databaseService from './services/database';
 import './App.css';
 
 function App() {
+  const [showLanding, setShowLanding] = useState(() => {
+    // Show landing page unless user has entered the app before in this session
+    return !sessionStorage.getItem('astrava_app_entered');
+  });
   const [screen, setScreen] = useState('home');
   const [language, setLanguage] = useState('en');
   const [result, setResult] = useState(null);
@@ -222,6 +227,16 @@ function App() {
     setShowCameraCapture(false);
     setCameraCallbacks(null);
   };
+
+  const handleEnterApp = () => {
+    sessionStorage.setItem('astrava_app_entered', 'true');
+    setShowLanding(false);
+  };
+
+  // Show landing page
+  if (showLanding) {
+    return <LandingPage onEnterApp={handleEnterApp} />;
+  }
 
   return (
     <div className="app">

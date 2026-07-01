@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: process.env.VITE_API_URL || 'http://localhost:3001',
         changeOrigin: true
       }
     }
@@ -17,11 +17,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Farmer Soil Analyzer',
-        short_name: 'Soil App',
-        description: 'Soil analysis and farming advice for farmers',
-        theme_color: '#4CAF50',
-        background_color: '#ffffff',
+        name: 'Astrava - Agricultural Intelligence',
+        short_name: 'Astrava',
+        description: 'AI-powered soil analysis and farming advice for Indian farmers',
+        theme_color: '#10b981',
+        background_color: '#0a0f1a',
         display: 'standalone',
         icons: [
           {

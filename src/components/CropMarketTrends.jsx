@@ -4,6 +4,8 @@ import { Search, TrendingUp, TrendingDown, Volume2, MapPin, Database } from 'luc
 import './CropMarketTrends.css';
 import { t } from '../translations';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 function CropMarketTrends({ language }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -24,7 +26,7 @@ function CropMarketTrends({ language }) {
   const searchCrops = async (query) => {
     try {
       const response = await fetch(
-        `/api/market/search?query=${encodeURIComponent(query)}`
+        `${API_BASE}/market/search?query=${encodeURIComponent(query)}`
       );
       const data = await response.json();
       setSearchResults(data.crops);
@@ -45,7 +47,7 @@ function CropMarketTrends({ language }) {
 
     try {
       const response = await fetch(
-        `/api/market/price/${encodeURIComponent(cropName)}`
+        `${API_BASE}/market/price/${encodeURIComponent(cropName)}`
       );
 
       if (!response.ok) {
@@ -103,7 +105,7 @@ function CropMarketTrends({ language }) {
       const explanation = `Market analysis for ${marketData.crop}. Current price is ${marketData.currentPrice} rupees per quintal. Price is ${trend} by ${Math.abs(marketData.percentageChange)} percent. ${marketData.priceChange > 0 ? 'This is a good time to sell.' : 'Consider waiting for better prices.'}`;
 
       // Translate to user's language
-      const translateResponse = await fetch('/api/translate', {
+      const translateResponse = await fetch(`${API_BASE}/translate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -115,7 +117,7 @@ function CropMarketTrends({ language }) {
       const { translatedText } = await translateResponse.json();
 
       // Convert to speech
-      const ttsResponse = await fetch('/api/tts', {
+      const ttsResponse = await fetch(`${API_BASE}/tts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

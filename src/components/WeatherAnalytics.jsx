@@ -4,6 +4,8 @@ import { Thermometer, Droplets, CloudRain, Wind, MapPin } from 'lucide-react';
 import './WeatherAnalytics.css';
 import { t } from '../translations';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 function WeatherAnalytics({ language }) {
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,7 @@ function WeatherAnalytics({ language }) {
 
       // Fetch weather analytics
       const response = await fetch(
-        `/api/weather/analytics?latitude=${latitude}&longitude=${longitude}`
+        `${API_BASE}/weather/analytics?latitude=${latitude}&longitude=${longitude}`
       );
 
       if (!response.ok) {

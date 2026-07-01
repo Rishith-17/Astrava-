@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+// In production on Render, VITE_API_URL must be the full backend URL
+// e.g. https://astrava-backend.onrender.com/api
+// In development, the Vite proxy rewrites /api → localhost:3001
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB — send original for best ML accuracy
 const ALLOWED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png'];
