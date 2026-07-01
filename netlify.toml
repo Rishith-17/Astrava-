@@ -3,8 +3,7 @@
   publish = "dist"
 
 [functions]
-  directory = "netlify/functions"
-  # zisi bundler preserves ESM imports and import.meta correctly
+  directory = "server/netlify-functions"
   node_bundler = "zisi"
 
 [functions."api"]
