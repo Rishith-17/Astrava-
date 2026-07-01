@@ -2,15 +2,6 @@
  * Server-side configuration for Agricultural Intelligence Engine
  */
 
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-try {
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  dotenv.config({ path: join(__dirname, '../.env') });
-  dotenv.config({ path: join(__dirname, '../../.env') });
-} catch (_) { /* production — env vars already set */ }
 
 export const INTELLIGENCE_CONFIG = {
   // API Keys

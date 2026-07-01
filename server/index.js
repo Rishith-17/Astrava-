@@ -20,11 +20,12 @@ import sarvamTTSService from './services/SarvamTTSService.js';
 import marketPriceService from './services/MarketPriceService.js';
 import sttRouter from './routes/stt.js';
 
-// Load environment variables - server/.env first, then root .env as fallback
+// Load environment variables for local development
 try {
-  dotenv.config({ path: new URL('.env', import.meta.url).pathname });
-  dotenv.config({ path: new URL('../.env', import.meta.url).pathname });
+  const { default: dotenv } = await import('dotenv');
+  dotenv.config();
 } catch (_) { /* production — env vars already set */ }
+
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
